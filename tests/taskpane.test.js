@@ -1237,7 +1237,13 @@ async function mfaPane(t, naaScript, apiResponses, extra) {
   const originalConsole = {};
   consoleMethods.forEach((name) => {
     originalConsole[name] = console[name];
-    console[name] = (...args) => warns.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '));
+    console[name] = (...args) => {
+      const text = args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+      // Node itself may print runtime warnings through console.error (e.g. "ExperimentalWarning: The MockTimers
+      // API is an experimental feature" on Node 22): they do not come from the task pane.
+      if (/^\(node:\d+\) \w*Warning:/.test(text)) return;
+      warns.push(text);
+    };
   });
   t.after(() => {
     global.fetch = originalFetch;
