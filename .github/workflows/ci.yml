@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate (${{ matrix.engine }})
+    runs-on: windows-2022
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include: [{"engine":"PowerShell 7","shell":"pwsh","package":true}]
+    steps:
+      - name: Check out the tested revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Use Node.js 22 from the runner tool cache
+        shell: pwsh
+        run: |
+          $node = Get-ChildItem (Join-Path $env:RUNNER_TOOL_CACHE 'node') -Directory | Where-Object Name -like '22.*' |
+              Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          if (-not $node) { throw 'Node.js 22 is not available in the runner tool cache.' }
+          Join-Path $node.FullName 'x64' | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Install dependencies
+        shell: pwsh
+        run: npm ci
+
+      - name: Unit tests
+        shell: pwsh
+        run: npm test
+
+      - name: Build (bundle and production manifest, placeholder site address)
+        env:
+          ADDIN_BASE_URL: https://ci-placeholder.azurestaticapps.net
+        shell: pwsh
+        run: npm run build
+
+      - name: Validate the environment files (schema, consistency, unique ids)
+        shell: pwsh
+        run: npm run validate:env
+
+      - name: Load pinned analysis and test modules
+        shell: pwsh
+        run: .\.github\scripts\Initialize-CIModules.ps1 -Destination "$env:RUNNER_TEMP\ci-modules"
+
+      - name: Analyze PowerShell sources (advisory diagnostics, syntax errors fail)
+        shell: pwsh
+        run: .\.github\scripts\Invoke-CI.ps1 -Stage Analyze -OutputDirectory "$env:RUNNER_TEMP\ci-results"
+
+      - name: Run the Pester tests (deploy script, package integrity)
+        shell: pwsh
+        run: .\.github\scripts\Invoke-CI.ps1 -Stage Test -OutputDirectory "$env:RUNNER_TEMP\ci-results"
+
+      - name: Build the release package in unsigned mode (no certificate, never published)
+        shell: pwsh
+        run: .\.github\scripts\Invoke-CI.ps1 -Stage Package -OutputDirectory "$env:RUNNER_TEMP\ci-results"
+
+      - name: Retain public CI evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ci-evidence
+          path: ${{ runner.temp }}/ci-results
+          if-no-files-found: error
+          retention-days: 7

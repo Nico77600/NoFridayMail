@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 760" width="2000" height="760">
+  <!-- Flow diagram (light), rendered to docs/images/readme-flow-light.png by npm run icons. -->
+  <rect width="2000" height="760" fill="#FFFFFF"/>
+  <text x="20" y="40" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" letter-spacing="3" fill="#0F6CBD">ONE SEND · FROM THE SEND BUTTON TO THE MAILBOX</text>
+  <rect x="20" y="80" width="300" height="170" rx="22" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="2" />
+  <text x="48" y="126" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="700" fill="#242424">Send</text>
+  <text x="48" y="166" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">Mail or meeting</text>
+  <text x="48" y="200" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">invitation in Outlook</text>
+  <path d="M324 165L400 165" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M386 153L400 165L386 177" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <rect x="404" y="80" width="500" height="170" rx="22" fill="#FFFFFF" stroke="#0F6CBD" stroke-width="3" />
+  <text x="432" y="126" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="700" fill="#242424">Add-in check</text>
+  <text x="432" y="166" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">OnMessageSend, OnAppointmentSend</text>
+  <text x="432" y="200" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">effective delivery day</text>
+  <text x="432" y="234" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">against the blocked days</text>
+  <path d="M908 130L1006 100" stroke="#0E700E" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M992 88L1006 100L992 112" stroke="#0E700E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="915" y="84" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="24" font-weight="700" fill="#0E700E">allowed</text>
+  <rect x="1014" y="40" width="420" height="100" rx="22" fill="#FFFFFF" stroke="#0E700E" stroke-width="2" />
+  <text x="1042" y="86" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="700" fill="#242424">Mail leaves</text>
+  <text x="1042" y="126" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">on an allowed day</text>
+  <path d="M908 200L1006 300" stroke="#B10E1C" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M992 288L1006 300L992 312" stroke="#B10E1C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="905" y="332" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="24" font-weight="700" fill="#B10E1C">blocked</text>
+  <rect x="1014" y="250" width="520" height="170" rx="22" fill="#FFFFFF" stroke="#B10E1C" stroke-width="2" />
+  <text x="1042" y="296" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="700" fill="#242424">Smart Alerts dialog</text>
+  <text x="1042" y="336" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">explains the rule and opens</text>
+  <text x="1042" y="370" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">the task pane (Schedule send)</text>
+  <path d="M1538 335L1620 335" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M1606 323L1620 335L1606 347" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <rect x="1624" y="250" width="356" height="170" rx="22" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="2" />
+  <text x="1652" y="296" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="700" fill="#242424">Schedule pane</text>
+  <text x="1652" y="336" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">pick the next working</text>
+  <text x="1652" y="370" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">day and time; the mail is</text>
+  <text x="1652" y="404" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">sent on that day</text>
+  <path d="M1274 424L1274 500" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M1260 488L1274 500L1260 512" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="1290" y="470" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="24" font-weight="700" fill="#0F6CBD">optional</text>
+  <rect x="1014" y="504" width="520" height="220" rx="22" fill="#FFFFFF" stroke="#0F6CBD" stroke-width="2" stroke-dasharray="10 8"/>
+  <text x="1042" y="550" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="700" fill="#242424">Exceptional send</text>
+  <text x="1042" y="590" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">written justification checked</text>
+  <text x="1042" y="624" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">MFA through Microsoft Entra ID</text>
+  <text x="1042" y="658" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">API returns a signed receipt;</text>
+  <text x="1042" y="692" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">header X-NoFriday-Bypass</text>
+  <path d="M1538 614L1620 614" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M1606 602L1620 614L1606 626" stroke="#0F6CBD" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <rect x="1624" y="504" width="356" height="220" rx="22" fill="#FFFFFF" stroke="#0F6CBD" stroke-width="3" />
+  <text x="1652" y="550" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="30" font-weight="700" fill="#242424">Exchange rule</text>
+  <text x="1652" y="590" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">transport rule: authorizes</text>
+  <text x="1652" y="624" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">by group, audits, reports;</text>
+  <text x="1652" y="658" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="25" fill="#616161">Purview DLP trace</text>
+  <text x="20" y="330" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="26" fill="#424242">Smart Alerts runs in Outlook; the blocking is a safeguard.</text>
+  <text x="20" y="366" font-family="'Segoe UI Variable Text','Segoe UI',Arial,sans-serif" font-size="26" fill="#424242">For a hard guarantee, add the Exchange transport rule.</text>
+</svg>

@@ -1,0 +1,42 @@
+{
+  "$schema": "../../../deploy/environment.schema.json",
+  "description": "TEST FIXTURE (lab-frozen): reproduces the shape of a protected laboratory environment (do not redeploy without agreement) with neutral values; its Id is the one of the development manifest (manifest.xml).",
+  "name": "lab-frozen",
+  "protected": true,
+  "displayName": "NoFridayMail",
+  "addinId": "2178c516-c0d6-4b65-bbca-ef763a06ba16",
+  "version": "1.0.0.0",
+  "providerName": "Nicolas Fabert",
+  "supportUrl": "https://github.com/Nico77600/NoFridayMail",
+  "azure": {
+    "resourceGroup": "rg-nfm-fixtures",
+    "location": "westeurope",
+    "staticWebAppName": "swa-nfm-fixture-lab-frozen",
+    "sku": "Free"
+  },
+  "rules": {
+    "blockedDays": [
+      3,
+      4
+    ],
+    "workingDays": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "sendHour": 8,
+    "sendMinute": 0,
+    "slotTimes": [
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "14:00",
+      "16:00"
+    ],
+    "dayCount": 10
+  },
+  "defaultLanguage": "fr"
+}

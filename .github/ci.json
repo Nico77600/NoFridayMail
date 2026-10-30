@@ -1,0 +1,12 @@
+{
+  "runtimeRoot": ".",
+  "testMode": "pester",
+  "testEntry": null,
+  "tests": [
+    "tests/Deploy.Tests.ps1",
+    "tests/NewEnvironment.Tests.ps1",
+    "tests/PackageIntegrity.Tests.ps1"
+  ],
+  "packageBuilder": "tools/New-NoFridayMailPackage.ps1",
+  "packageEntry": "tools/Deploy-NoFridayMail.ps1"
+}

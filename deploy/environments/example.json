@@ -1,0 +1,26 @@
+{
+  "$schema": "../environment.schema.json",
+  "description": "TEMPLATE, never deployed as is. Create a real environment with: pwsh tools/New-NoFridayMailEnvironment.ps1 -Name <name> (it copies this file and generates a unique add-in Id once; keep that Id for good). See docs/NoFridayMail-Guide.md. This example blocks Monday and Tuesday and is named \"NoFridayMail (Staging)\".",
+  "name": "example",
+  "displayName": "NoFridayMail (Staging)",
+  "addinId": "11111111-2222-4333-8444-555555555555",
+  "version": "1.0.0.0",
+  "providerName": "My Organization",
+  "supportUrl": "https://example.com/support-nofridaymail",
+  "azure": {
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroup": "rg-nofridaymail-staging",
+    "location": "westeurope",
+    "staticWebAppName": "swa-nofridaymail-staging",
+    "sku": "Free"
+  },
+  "rules": {
+    "blockedDays": [1, 2],
+    "workingDays": [1, 2, 3, 4, 5],
+    "sendHour": 9,
+    "sendMinute": 30,
+    "slotTimes": ["09:30", "11:00", "14:00", "16:30"],
+    "dayCount": 8
+  },
+  "defaultLanguage": "fr"
+}

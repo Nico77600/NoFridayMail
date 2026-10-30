@@ -1,0 +1,38 @@
+# Line endings are normalized to LF in the repository.
+* text=auto eol=lf
+
+# Binaries
+*.png binary
+
+# Documentation, not code (language statistics).
+*.md linguist-documentation
+docs/** linguist-documentation
+
+# PowerShell files that the owner signs (Authenticode) before a release: Git must keep their exact bytes (CRLF included).
+# The signature is added by the owner's procedure, outside CI; until then these files are plain text.
+tools/Deploy-NoFridayMail.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+tools/New-NoFridayMailEnvironment.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+tools/lib/Deploy-Checks.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+tools/Test-PackageIntegrity.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+
+# Exact bytes for the documents hashed in the release PackageIntegrity.psd1 manifest.
+docs/**/*.html -text
+README.md -text
+THIRD-PARTY-NOTICES.md -text
+CHANGELOG.md -text
+
+# "Download ZIP" and `git archive` ship the strict minimum needed to deploy and use the add-in (the release ZIP is built
+# from the same archive). Tests, CI, development tools, agent/provenance notes and SVG sources stay in the repository.
+/.github export-ignore
+/tests export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/AGENTS.md export-ignore
+/PROVENANCE.md export-ignore
+/tools/preview export-ignore
+/tools/build-preview.js export-ignore
+/tools/make-icons.js export-ignore
+/tools/New-NoFridayMailPackage.ps1 export-ignore
+/tools/Build-Documentation.js export-ignore
+/assets/*.svg export-ignore
+/assets/doc export-ignore

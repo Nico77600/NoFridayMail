@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Simplified variant for small sizes (16 and 32 px): fewer details, thicker strokes. -->
+  <rect width="128" height="128" rx="26" fill="#0F6CBD"/>
+  <rect x="14" y="26" width="88" height="84" rx="12" fill="#FFFFFF"/>
+  <path d="M14 38a12 12 0 0 1 12-12h64a12 12 0 0 1 12 12v18H14z" fill="#C7E0F4"/>
+  <rect x="34" y="12" width="14" height="26" rx="7" fill="#FFFFFF"/>
+  <rect x="68" y="12" width="14" height="26" rx="7" fill="#FFFFFF"/>
+  <circle cx="90" cy="90" r="34" fill="#FFFFFF"/>
+  <circle cx="90" cy="90" r="25" fill="none" stroke="#D13438" stroke-width="15"/>
+  <path d="M72 108L108 72" stroke="#D13438" stroke-width="15" stroke-linecap="round"/>
+</svg>

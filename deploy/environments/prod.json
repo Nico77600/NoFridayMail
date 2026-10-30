@@ -1,0 +1,25 @@
+{
+  "$schema": "../environment.schema.json",
+  "description": "PRODUCTION: replace the Azure resource names (resourceGroup, staticWebAppName) with those of your subscription before the first deployment. The addinId belongs to production only and is kept for good: never reuse it elsewhere and never change it once users installed the add-in.",
+  "name": "prod",
+  "displayName": "NoFridayMail",
+  "addinId": "e0a93350-84f0-44c9-a8d7-4c3bad350724",
+  "version": "1.1.0.0",
+  "providerName": "Nicolas Fabert",
+  "supportUrl": "https://github.com/Nico77600/NoFridayMail",
+  "azure": {
+    "resourceGroup": "rg-nofridaymail-prod",
+    "location": "westeurope",
+    "staticWebAppName": "swa-nofridaymail-prod",
+    "sku": "Free"
+  },
+  "rules": {
+    "blockedDays": [5],
+    "workingDays": [1, 2, 3, 4, 5],
+    "sendHour": 8,
+    "sendMinute": 0,
+    "slotTimes": ["08:00", "09:00", "10:00", "11:00", "14:00", "16:00"],
+    "dayCount": 10
+  },
+  "defaultLanguage": "fr"
+}

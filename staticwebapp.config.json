@@ -1,0 +1,10 @@
+{
+  "globalHeaders": {
+    "Cache-Control": "no-cache",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer"
+  },
+  "mimeTypes": {
+    ".xml": "application/xml"
+  }
+}

@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NoFridayMail - Technical guide</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("theme");
+    const theme = param === "dark" || param === "light" ? param : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef; --cp-bg-elevated: #fcfbf8; --cp-surface: #ffffff; --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede; --cp-border-strong: #919191; --cp-text: #242424; --cp-text-muted: #5c5c5c; --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b; --cp-accent-hover: #9a1a41; --cp-accent-soft: rgba(177, 31, 75, 0.08); --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a; --cp-danger: #dc2626; --cp-warning: #f59e0b; --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12); --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86); --cp-panel-strong: rgba(255, 255, 255, 0.96); --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a; --cp-bg-elevated: #343231; --cp-surface: #292929; --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747; --cp-border-strong: #5f5f5f; --cp-text: #dedede; --cp-text-muted: #919191; --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1; --cp-accent-hover: #fb7b91; --cp-accent-soft: rgba(253, 142, 161, 0.14); --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80; --cp-danger: #f87171; --cp-warning: #fbbf24; --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32); --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72); --cp-panel-strong: rgba(41, 41, 41, 0.96); --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 15.5px/1.7 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; display: grid; grid-template-columns: 300px minmax(0, 1fr); }
+a { color: var(--cp-link); text-decoration: none; } a:hover { text-decoration: underline; }
+.icon { width: 22px; height: 22px; } .icon-sm { width: 16px; height: 16px; flex-shrink: 0; } .icon-xs { width: 12px; height: 12px; }
+button { font: inherit; color: var(--cp-text); background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 0.625rem; cursor: pointer; }
+button:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 2px; }
+
+/* ---- Sidebar -------------------------------------------------------------------- */
+aside { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--cp-bg-elevated); border-right: 1px solid var(--cp-border); padding: 24px 16px 32px; }
+.brand { display: flex; gap: 12px; align-items: center; padding: 4px 8px 20px; border-bottom: 1px solid var(--cp-border); margin-bottom: 12px; }
+.brand-logo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--cp-accent); color: var(--cp-accent-fg); }
+.brand-name { font-weight: 700; font-size: 15px; line-height: 1.2; } .brand-sub { font-size: 12px; color: var(--cp-text-muted); }
+.nav-part { margin: 20px 8px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cp-accent); }
+.nav-part span { color: var(--cp-text-muted); font-weight: 600; letter-spacing: 0.04em; }
+aside a { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin: 1px 0; border-radius: 0.625rem; color: var(--cp-text); font-size: 13.5px; line-height: 1.35; border-left: 3px solid transparent; }
+aside a:hover { background: var(--cp-accent-soft); text-decoration: none; }
+aside a.active { background: var(--cp-accent-soft); border-left-color: var(--cp-accent); font-weight: 600; }
+.nav-badge { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11.5px; font-weight: 700; background: var(--cp-surface-soft); color: var(--cp-text-muted); border: 1px solid var(--cp-border); }
+aside a.active .nav-badge { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+
+/* ---- Main -------------------------------------------------------------------------- */
+main { padding: 40px 56px 80px; max-width: 1080px; width: 100%; }
+.hero { position: relative; overflow: hidden; border: 1px solid var(--cp-border); border-top: 4px solid var(--cp-accent); border-radius: 16px; padding: 36px 40px 32px; margin-bottom: 40px; background: linear-gradient(125deg, var(--cp-surface) 40%, var(--cp-accent-soft)); }
+.hero::before { content: ""; position: absolute; width: 320px; height: 320px; right: -110px; top: -170px; border: 44px solid var(--cp-highlight); border-radius: 50%; pointer-events: none; }
+.hero-top { position: relative; display: flex; align-items: center; gap: 18px; }
+.hero-logo { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: var(--cp-accent); color: var(--cp-accent-fg); flex-shrink: 0; }
+.hero-logo .icon { width: 32px; height: 32px; }
+.eyebrow, .section-eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cp-accent); }
+.hero h1 { font-size: 38px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; margin: 4px 0 0; }
+#theme { margin-left: auto; padding: 8px 10px; display: grid; place-items: center; }
+.badges { position: relative; display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 18px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12.5px; background: var(--cp-surface); border: 1px solid var(--cp-border); color: var(--cp-text-muted); }
+.badge-accent { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); font-weight: 600; }
+.lead { position: relative; font-size: 17.5px; line-height: 1.6; max-width: 760px; margin: 0 0 24px; }
+
+.part { display: flex; align-items: baseline; gap: 14px; margin: 56px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--cp-accent); }
+.part-label { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cp-accent); }
+.part-name { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+
+.section { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 32px 40px 28px; margin: 0 0 28px; box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14); }
+.section-head { display: flex; align-items: center; gap: 16px; padding-bottom: 18px; margin-bottom: 8px; border-bottom: 1px solid var(--cp-border); }
+.section-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); flex-shrink: 0; }
+.section-icon .icon { width: 26px; height: 26px; }
+.section h2 { font-size: 25px; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 0; line-height: 1.2; }
+.section-body > :first-child { margin-top: 16px; }
+h3 { font-size: 17.5px; font-weight: 650; margin: 36px 0 12px; padding-left: 12px; border-left: 3px solid var(--cp-accent); line-height: 1.3; }
+h3.step-h { display: flex; align-items: center; gap: 12px; padding-left: 0; border-left: 0; margin-top: 32px; }
+h3.step-h .path-num { width: 32px; height: 32px; font-size: 14.5px; }
+p { margin: 12px 0; } ul, ol { padding-left: 22px; } li { margin: 6px 0; } li::marker { color: var(--cp-accent); }
+strong { font-weight: 650; }
+code { font-family: Consolas, "Courier New", Courier, monospace; font-size: 0.88em; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); padding: 1px 6px; border-radius: 6px; }
+kbd { font-family: Consolas, monospace; font-size: 0.85em; padding: 1px 7px; border: 1px solid var(--cp-border-strong); border-bottom-width: 2px; border-radius: 6px; background: var(--cp-surface-soft); }
+hr { border: 0; border-top: 1px solid var(--cp-border); margin: 28px 0; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 16px 0 20px; border: 1px solid var(--cp-border); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.55; }
+th { text-align: left; font-weight: 650; font-size: 12.5px; letter-spacing: 0.02em; color: var(--cp-text-muted); background: var(--cp-surface-soft); padding: 11px 16px; border-bottom: 1px solid var(--cp-border); }
+td { padding: 11px 16px; border-bottom: 1px solid var(--cp-border); vertical-align: top; }
+td:first-child { font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--cp-accent-soft); }
+td code { white-space: nowrap; }
+
+/* Code */
+.code { margin: 16px 0 20px; border: 1px solid var(--cp-border); border-radius: 12px; overflow: hidden; background: var(--cp-surface-soft); }
+.code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 6px 16px; border-bottom: 1px solid var(--cp-border); font-size: 12px; font-weight: 600; color: var(--cp-text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.copy { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; font-size: 12px; text-transform: none; letter-spacing: 0; }
+.copy.done { color: var(--cp-success); border-color: var(--cp-success); }
+.code pre { margin: 0; padding: 16px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; }
+.code pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+/* Callouts */
+.markdown-alert { --tone: var(--cp-link); margin: 18px 0; padding: 14px 18px; border: 1px solid color-mix(in srgb, var(--tone) 35%, var(--cp-border)); border-left: 4px solid var(--tone); border-radius: 12px; background: color-mix(in srgb, var(--tone) 7%, var(--cp-surface)); }
+.markdown-alert p { margin: 6px 0; }
+.markdown-alert-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tone); margin: 0 0 4px !important; }
+.markdown-alert-tip { --tone: var(--cp-success); } .markdown-alert-important { --tone: var(--cp-accent); }
+.markdown-alert-warning { --tone: var(--cp-warning); } .markdown-alert-caution { --tone: var(--cp-danger); }
+
+/* Cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 18px 0 22px; position: relative; }
+.card-item { display: flex; gap: 14px; padding: 16px 18px; border: 1px solid var(--cp-border); border-radius: 14px; background: var(--cp-surface); transition: transform 160ms ease, border-color 160ms ease; }
+.card-item:hover { transform: translateY(-2px); border-color: var(--cp-accent); }
+.card-icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); flex-shrink: 0; }
+.card-title { font-weight: 700; font-size: 14.5px; line-height: 1.3; margin: 2px 0 4px; }
+.card-text { font-size: 13.5px; line-height: 1.5; color: var(--cp-text-muted); }
+
+/* Steps */
+.steps { list-style: none; padding: 0; margin: 18px 0 22px; position: relative; }
+.steps li { position: relative; display: flex; gap: 16px; margin: 0; padding: 0 0 18px; }
+.steps li:not(:last-child)::before { content: ""; position: absolute; left: 16px; top: 36px; bottom: 2px; width: 2px; background: var(--cp-border); }
+.step-num { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; background: var(--cp-accent); color: var(--cp-accent-fg); box-shadow: 0 0 0 4px var(--cp-accent-soft); }
+.step-body { padding-top: 5px; } .step-title { font-weight: 700; font-size: 15px; line-height: 1.35; }
+.step-text { color: var(--cp-text-muted); font-size: 14.5px; margin-top: 2px; }
+
+/* Flow */
+.flow { display: flex; align-items: stretch; flex-wrap: wrap; gap: 6px; margin: 20px 0 24px; padding: 20px; border-radius: 14px; background: var(--cp-surface-soft); border: 1px dashed var(--cp-border-strong); }
+.flow-node { flex: 1 1 130px; min-width: 120px; text-align: center; padding: 16px 12px; border-radius: 12px; background: var(--cp-surface); border: 1px solid var(--cp-border); }
+.flow-icon { width: 42px; height: 42px; margin: 0 auto 8px; border-radius: 12px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); }
+.flow-title { font-weight: 700; font-size: 14px; line-height: 1.3; } .flow-text { font-size: 12.5px; color: var(--cp-text-muted); line-height: 1.4; margin-top: 4px; }
+.flow-arrow { flex: 0 0 auto; min-width: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--cp-border-strong); padding: 0 2px; }
+.flow-arrow svg { width: 44px; height: 14px; color: var(--cp-accent); }
+.flow-label { font-size: 12px; font-weight: 700; color: var(--cp-accent); } .flow-sub { font-size: 11px; color: var(--cp-text-muted); text-align: center; max-width: 110px; line-height: 1.3; }
+
+/* Path (guided path: trunk, then branches) */
+.path { margin: 20px 0 26px; padding: 20px 22px 22px; border-radius: 16px; background: var(--cp-surface-soft); border: 1px dashed var(--cp-border-strong); }
+.path-caption { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cp-accent); }
+.path-row { display: flex; align-items: stretch; }
+.path-node { flex: 1 1 0; min-width: 0; display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--cp-surface); border: 1px solid var(--cp-border); }
+.path-arrow { flex: 0 0 18px; display: grid; place-items: center; color: var(--cp-accent); }
+.path-arrow svg { width: 10px; height: 34px; }
+.path-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; line-height: 1; background: var(--cp-accent); color: var(--cp-accent-fg); box-shadow: 0 0 0 3px var(--cp-accent-soft); }
+.path-title { font-weight: 700; font-size: 13.5px; line-height: 1.3; padding-top: 3px; }
+.path-sub { font-size: 12.5px; line-height: 1.4; color: var(--cp-text-muted); margin-top: 3px; }
+.path-sub code { font-size: 0.92em; padding: 0 4px; }
+.path-fork { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 16px; color: var(--cp-accent); }
+.path-fork > div { display: grid; place-items: center; height: 34px; }
+.path-fork svg { width: 14px; height: 26px; }
+.path-branches { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 16px; }
+.path-branch { border: 1px solid var(--cp-border); border-top: 3px solid var(--cp-accent); border-radius: 14px; background: var(--cp-surface); padding: 14px 16px 6px; }
+.path-head { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15.5px; margin: 0 0 12px; }
+.path-letter { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-size: 14px; background: var(--cp-text); color: var(--cp-surface); }
+.path-icon { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); }
+.path-steps { list-style: none; padding: 0; margin: 0; }
+.path-steps li { position: relative; display: flex; gap: 12px; margin: 0; padding: 0 0 12px; }
+.path-steps li:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 30px; bottom: 0; width: 2px; background: var(--cp-border); }
+@media (max-width: 900px) { .path-row { flex-direction: column; } .path-arrow { transform: rotate(90deg); height: 18px; } .path-branches, .path-fork { grid-auto-flow: row; } }
+
+/* Figures */
+figure { margin: 18px 0 24px; }
+figure img { display: block; max-width: 100%; border: 1px solid var(--cp-border); border-radius: 12px; box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14); cursor: zoom-in; }
+figcaption { font-size: 13px; color: var(--cp-text-muted); margin-top: 8px; text-align: center; }
+dialog#zoom { border: 0; padding: 0; background: transparent; max-width: 96vw; max-height: 96vh; }
+dialog#zoom::backdrop { background: rgba(0, 0, 0, 0.7); }
+dialog#zoom img { max-width: 96vw; max-height: 94vh; border-radius: 12px; cursor: zoom-out; display: block; }
+
+#to-top { position: fixed; right: 24px; bottom: 24px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--cp-accent); color: var(--cp-accent-fg); border: 0; box-shadow: var(--cp-shadow); opacity: 0; pointer-events: none; transition: opacity 200ms; }
+#to-top.visible { opacity: 1; pointer-events: auto; } #to-top:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--cp-border); font-size: 12.5px; color: var(--cp-text-muted); text-align: center; }
+
+/* Long inline code (paths, commands) must wrap inside cards, steps and path nodes instead of overflowing them. */
+.card-item > div, .step-body, .flow-node, .path-node > div, .path-steps li > div { min-width: 0; }
+.card-text code, .step-text code, .path-sub code, .flow-text code, .path-title code { overflow-wrap: anywhere; }
+.path-title, .path-sub, .card-title, .card-text, .step-title, .step-text { overflow-wrap: anywhere; }
+
+@media (max-width: 1000px) {
+  body { display: block; }
+  aside { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--cp-border); }
+  main { padding: 24px 16px 60px; } .section { padding: 24px 20px; } .hero { padding: 28px 22px; }
+}
+@media (max-width: 520px) {
+  code { overflow-wrap: anywhere; } .code pre code { overflow-wrap: normal; }
+  main { padding: 16px 10px 48px; } .hero { padding: 22px 16px 20px; } .section { padding: 20px 14px 18px; border-radius: 14px; }
+  .hero-top { gap: 12px; } .hero-top > div:nth-child(2) { min-width: 0; flex: 1 1 0; }
+  .hero-logo { width: 44px; height: 44px; border-radius: 12px; } .hero-logo .icon { width: 24px; height: 24px; }
+  .hero h1 { font-size: 26px; overflow-wrap: anywhere; } .lead { font-size: 16px; }
+  #theme { align-self: flex-start; flex-shrink: 0; }
+  .section-head { gap: 12px; } .section-icon { width: 40px; height: 40px; } .section h2 { font-size: 21px; overflow-wrap: anywhere; }
+  .part-name { font-size: 22px; } .part { flex-wrap: wrap; gap: 6px 14px; }
+  .code pre { padding: 12px 14px; font-size: 12.5px; } .cards { grid-template-columns: 1fr; }
+  th, td { padding: 9px 12px; } td code { overflow-wrap: normal; }
+  .markdown-alert { padding: 12px 14px; } .flow { padding: 12px; } .path { padding: 14px 12px 14px; }
+  .flow { flex-direction: column; align-items: stretch; gap: 0; } .flow-node { flex: 0 0 auto; }
+  .flow-arrow { min-width: 0; padding: 2px 0; } .flow-arrow svg { transform: rotate(90deg); margin: 15px 0; } .flow-sub { max-width: none; }
+}
+@media print {
+  body { display: block; background: #fff; } aside, #to-top, #theme, .copy { display: none !important; }
+  main { padding: 0; max-width: none; } .section { break-inside: avoid-page; box-shadow: none; } .part { break-before: page; }
+}
+</style></head><body>
+<aside><div class="brand"><div class="brand-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><div class="brand-name">NoFridayMail</div><div class="brand-sub">Technical guide · v1.1.0</div></div></div>
+<nav aria-label="Contents"><a href="#quick-start" data-target="quick-start"><span class="nav-badge"><svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg></span><span class="nav-text">Quick start</span></a><div class="nav-part">Part I <span>Understand</span></div><a href="#purpose" data-target="purpose"><span class="nav-badge">1</span><span class="nav-text">Purpose</span></a><a href="#how-it-works" data-target="how-it-works"><span class="nav-badge">2</span><span class="nav-text">How it works</span></a><a href="#things-to-know" data-target="things-to-know"><span class="nav-badge">3</span><span class="nav-text">Things to know</span></a><div class="nav-part">Part II <span>Set up</span></div><a href="#prerequisites" data-target="prerequisites"><span class="nav-badge">4</span><span class="nav-text">Prerequisites</span></a><a href="#environments-and-settings" data-target="environments-and-settings"><span class="nav-badge">5</span><span class="nav-text">Environments and settings</span></a><a href="#build-and-deploy" data-target="build-and-deploy"><span class="nav-badge">6</span><span class="nav-text">Build and deploy</span></a><a href="#publish-the-manifest" data-target="publish-the-manifest"><span class="nav-badge">7</span><span class="nav-text">Publish the manifest</span></a><div class="nav-part">Part III <span>Use</span></div><a href="#everyday-use" data-target="everyday-use"><span class="nav-badge">8</span><span class="nav-text">Everyday use</span></a><a href="#exceptional-send" data-target="exceptional-send"><span class="nav-badge">9</span><span class="nav-text">Exceptional send</span></a><a href="#finding-a-request" data-target="finding-a-request"><span class="nav-badge">10</span><span class="nav-text">Finding a request</span></a><div class="nav-part">Part IV <span>Maintain</span></div><a href="#download-packaging-and-integrity" data-target="download-packaging-and-integrity"><span class="nav-badge">11</span><span class="nav-text">Download, packaging and integrity</span></a><a href="#development" data-target="development"><span class="nav-badge">12</span><span class="nav-text">Development</span></a><a href="#annex-a-troubleshooting" data-target="annex-a-troubleshooting"><span class="nav-badge">A</span><span class="nav-text">Troubleshooting</span></a><a href="#annex-b-the-example-environment-line-by-line" data-target="annex-b-the-example-environment-line-by-line"><span class="nav-badge">B</span><span class="nav-text">The example environment, line by line</span></a><a href="#annex-c-versioning" data-target="annex-c-versioning"><span class="nav-badge">C</span><span class="nav-text">Versioning</span></a></nav></aside>
+<main><header class="hero" id="top"><div class="hero-top"><div class="hero-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><div class="eyebrow">Technical guide</div><h1>NoFridayMail</h1></div><button type="button" id="theme" class="ghost" title="Light / dark"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></button></div><div class="badges"><span class="badge badge-accent">Version 1.1.0</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Updated 2026-10-30</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Nicolas Fabert</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg>PowerShell 7.4+</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Outlook Smart Alerts</span></div><p class="lead">An Outlook add-in (<strong>Smart Alerts</strong>, event-based activation) that stops e-mails and meeting invitations from leaving on a <strong>blocked day</strong> (Friday by default), offers to schedule the send for the next allowed day, and — as an option — lets an authorized person send anyway with a <strong>written justification</strong> and an <strong>identity check (MFA)</strong>. It is hosted as a small static website on Azure Static Web Apps and published with the Microsoft 365 admin center.</p>
+<div class="markdown-alert markdown-alert-important">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2.5h12v8H8.5L5 13.5v-3H2z"/><path d="M8 4.75v2.5M8 8.6v.01"/></svg>Important</p>
+<p>Files downloaded from the Internet may be blocked by Windows and fail to run. Before using this project, unblock every file in the downloaded folder:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>Get-ChildItem &quot;C:\Chemin\Du\Dossier&quot; -Recurse -File -Force | Unblock-File</code></pre></div>
+<p>Replace the example path with the folder where you downloaded or extracted this project.</p>
+</div>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></svg>Note</p>
+<p>This is the <strong>technical guide</strong>: how the add-in works, every setting of an environment file, how it is built, deployed and verified, the exceptional-send architecture and how to maintain the project. For the step-by-step installation, read the <a href="NoFridayMail-UserGuide.html">user guide</a>.</p>
+</div>
+<div class="cards"><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div><div><div class="card-title">What it answers</div><div class="card-text">"Can this message leave today?" — and, if not, "when can it?".</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg></div><div><div class="card-title">Where the rules live</div><div class="card-text">In <strong>one small JSON file per environment</strong>: blocked days, offered days, hours, name, Azure resources.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div><div><div class="card-title">What it keeps</div><div class="card-text">Nothing in Outlook. The website is static. Only the optional MFA level has an API that writes a log line per request.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg></div><div><div class="card-title">What it produces</div><div class="card-text">A website folder, a <strong>manifest</strong> to publish, and a ZIP per environment (<code>out/NoFridayMail-&lt;env&gt;-&lt;version&gt;.zip</code>).</div></div></div></div>
+</header><section class="section" id="quick-start"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg></div><div><div class="section-eyebrow">Start here</div><h2>Quick start</h2></div></div><div class="section-body">
+<!--path--><div class="path"><div class="path-caption"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Set up once: then the website is online</span></div><div class="path-row"><div class="path-node"><span class="path-num">1</span><div><div class="path-title">Get the tools</div><div class="path-sub">PowerShell 7.4, Node.js 22, Azure CLI, <code>az login</code></div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">2</span><div><div class="path-title">Prepare your environment</div><div class="path-sub"><code>New-NoFridayMailEnvironment.ps1 -Name &lt;name&gt;</code> creates <code>deploy/environments.local/&lt;name&gt;.json</code></div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">3</span><div><div class="path-title">Simulate</div><div class="path-sub"><code>Deploy-NoFridayMail.ps1 -WhatIf</code></div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">4</span><div><div class="path-title">Deploy</div><div class="path-sub">site online, checks passed</div></div></div></div><div class="path-fork"><div><svg viewBox="0 0 14 26" aria-hidden="true"><path d="M7 1v22M2 18l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><svg viewBox="0 0 14 26" aria-hidden="true"><path d="M7 1v22M2 18l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="path-branches"><div class="path-branch"><div class="path-head"><span class="path-letter">A</span><span class="path-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Install for one person (local)</span></div><ol class="path-steps"><li><span class="path-num">5</span><div><div class="path-title">Sideload the manifest</div><div class="path-sub"><code>https://aka.ms/olksideload</code>, Add from file</div></div></li><li><span class="path-num">6</span><div><div class="path-title">Test</div><div class="path-sub">block today in a test environment</div></div></li></ol></div><div class="path-branch"><div class="path-head"><span class="path-letter">B</span><span class="path-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 5.5 5"/></svg></span><span>Deploy for everyone (centralized)</span></div><ol class="path-steps"><li><span class="path-num">5</span><div><div class="path-title">Upload the manifest</div><div class="path-sub">admin center › Integrated apps</div></div></li><li><span class="path-num">6</span><div><div class="path-title">Pilot group</div><div class="path-sub">then widen the audience</div></div></li></ol></div></div></div><!--/path-->
+<p>Every step with its exact command: <a href="NoFridayMail-UserGuide.html#start-here">user guide, chapters 3 to 5</a>.</p>
+<div class="markdown-alert markdown-alert-important">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2.5h12v8H8.5L5 13.5v-3H2z"/><path d="M8 4.75v2.5M8 8.6v.01"/></svg>Important</p>
+<p>The add-in is a <strong>safeguard against accidental sends</strong>, not a security control. It uses the Smart Alerts <code>SoftBlock</code> mode: if Outlook cannot load it, the message is sent. For a hard guarantee, use an Exchange Online transport rule. The add-in runs in the Outlook client: it reads the delivery time of the item being sent and the clock, makes no network call of its own (except the optional MFA level) and stores nothing.</p>
+</div>
+<div class="markdown-alert markdown-alert-warning">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.75 14.75 13.5H1.25z"/><path d="M8 6.25v3.5M8 11.6v.01"/></svg>Warning</p>
+<p>Keep the deployment token of the Static Web App secret, and restrict who can change the repository. A compromised website could change the behavior of the add-in for every user.</p>
+</div>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></svg>Note</p>
+<p>The exceptional send is <strong>off</strong> unless an environment file has a <code>bypass</code> block. The server side (Exchange transport rule, Purview DLP, and for the MFA level the Entra registration) must exist <strong>before</strong> you turn it on in production.</p>
+</div>
+</div></section><div class="part" id="part-i-understand"><span class="part-label">Part I</span><span class="part-name">Understand</span></div>
+<section class="section" id="purpose"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div><div><div class="section-eyebrow">Chapter 1</div><h2>Purpose</h2></div></div><div class="section-body">
+<p>On a blocked day, an e-mail or a meeting invitation must not leave. The add-in hooks the <strong>send</strong> event of Outlook (<code>OnMessageSend</code>, <code>OnAppointmentSend</code>), computes the day on which the message would <strong>really be delivered</strong>, and blocks the send if that day is blocked. For an e-mail it offers to schedule the delivery on an allowed day.</p>
+<div class="cards"><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><div class="card-title">E-mail</div><div class="card-text">Blocked on a blocked day, unless the delivery is delayed to an allowed day. A <strong>schedule pane</strong> helps to choose the day and the time.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><div class="card-title">Meeting invitation</div><div class="card-text">Cannot be delayed: blocked with an explanation, to be sent on an allowed day. Never bypassed.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/></svg></div><div><div class="card-title">Exceptional send</div><div class="card-text">Optional. A justification header, validated by Exchange (group) and logged. Mail only.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg></div><div><div class="card-title">Environments</div><div class="card-text">Several installations (test, production, another company) from one source tree, each with its own identity and rules.</div></div></div></div>
+</div></section><section class="section" id="how-it-works"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="5" rx="1.5"/><rect x="14" y="15" width="7" height="5" rx="1.5"/><path d="M6.5 9v4a2 2 0 0 0 2 2H14"/></svg></div><div><div class="section-eyebrow">Chapter 2</div><h2>How it works</h2></div></div><div class="section-body">
+<div class="flow"><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div class="flow-title">Send clicked</div><div class="flow-text">Outlook raises the send event of the add-in</div></div><div class="flow-arrow"><span class="flow-label">effective delivery time</span><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M31 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="flow-sub">delayed delivery if set and in the future, otherwise now</span></div><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg></div><div class="flow-title">Rules</div><div class="flow-text">blocked day? allowed day? (pure date logic, no Office dependency)</div></div><div class="flow-arrow"><span class="flow-label">blocked</span><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M31 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="flow-sub">Smart Alerts dialog</span></div><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div class="flow-title">Schedule pane</div><div class="flow-text">suggestions, row of days, time chips, one sticky action</div></div><div class="flow-arrow"><span class="flow-label">delivery time set</span><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M31 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="flow-sub">the message leaves at the chosen time</span></div><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div class="flow-title">Exchange</div><div class="flow-text">optional transport rule as the strict layer</div></div></div>
+<h3 id="the-rule">2.1 The rule</h3>
+<p>A send is blocked if its <strong>effective delivery time</strong> falls on a blocked day, in the <strong>local time of the client</strong>.</p>
+<ul>
+<li>Effective time = the delayed delivery of the message (<code>delayDeliveryTime</code>) if it is set and in the future, otherwise now.</li>
+<li>Thursday evening delayed to Friday: <strong>blocked</strong>. Friday delayed to Saturday or Monday: <strong>allowed</strong>.</li>
+<li>A delayed delivery set through Outlook's own feature ("Delay delivery") on a Friday is blocked too: the send handler is the final safeguard.</li>
+<li>Meetings: an invitation cannot be delayed. On a blocked day the send is blocked with an explanation; the meeting is not sent and can be sent from the next allowed day.</li>
+<li>The blocked day is refused at three levels: the pane, <code>validateCustomDate()</code> in <code>src/shared/rules.js</code>, and the <code>OnMessageSend</code> handler.</li>
+</ul>
+<p><strong>Blocked days and offered days.</strong> <code>blockedDays</code> (default Friday) forbid sending. <code>workingDays</code> (default Monday to Friday) only control which days are <strong>offered</strong>. A day is offered if it is a working day <strong>and</strong> not blocked. Weekends are never blocked and never offered: a manual send on a Saturday is allowed. If no day qualifies, the pane says "No working day available." and the messages say so, without a <em>Schedule</em> button.</p>
+<h3 id="the-user-journey">2.2 The user journey</h3>
+<ol>
+<li>The user clicks <strong>Send</strong> on a blocked day (or with a delivery time that falls on one).</li>
+<li>A dialog (French or English according to the language of Outlook) explains that the send is not allowed and offers <strong>Schedule send</strong> (a custom <em>Take Action</em> button).</li>
+<li>The task pane offers, with the full date displayed ("Saturday, October 31, 2026 at 8:00 AM"): <strong>Suggestions</strong> (the first two offered days after today, at the configured time), <strong>Choose a day</strong> (a scrolling row of the next offered days with "Today" / "Tomorrow") and <strong>Time</strong> (chips from <code>slotTimes</code>, without past hours today). Choosing a suggestion clears the day and time, and the other way round. Clicking a card never sends.</li>
+<li>One sticky action, whose label summarizes the choice ("Schedule and send · Fri, Oct 30 at 9:00 AM"), disabled with an explicit text until something is chosen. With Outlook <strong>Mailbox 1.15</strong> (<code>item.sendAsync</code>) it schedules, checks that the delivery time is set on an allowed day, then sends; otherwise it schedules and asks to click Send again.</li>
+<li><strong>Remove the schedule</strong> (never sends) appears if a delivery time is already set.</li>
+<li>At send time the delivery falls on an allowed day: the message leaves at the planned time.</li>
+</ol>
+<h3 id="languages">2.3 Languages</h3>
+<p>French (the product language, default) and English. The display language of Outlook (<code>Office.context.displayLanguage</code>) is read at each call: <code>fr*</code> gives French, anything else English, a missing language French. The dialog button is "Planifier l'envoi" / "Schedule send" (20 characters at most). The manifest keeps <code>DefaultLocale</code> fr-FR and adds <code>en-US</code> and <code>en-GB</code> labels. All strings live in <code>src/shared/config.js</code> as <code>languages.fr</code> / <code>languages.en</code> with the same keys and <code>{placeholders}</code>, checked by <code>tests/i18n.test.js</code>.</p>
+<h3 id="degradation-by-outlook-version">2.4 Degradation by Outlook version</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Mailbox requirement set</th><th>Feature</th></tr>
+</thead>
+<tbody>
+<tr><td>1.12 (minimum)</td><td>Blocking with a plain-text <code>errorMessage</code></td></tr>
+<tr><td>1.13</td><td>Reading the delayed delivery; scheduling from the pane. Without 1.13 the message points to the native "Delay delivery"</td></tr>
+<tr><td>1.14</td><td>Custom button (<code>cancelLabel</code>) opening the pane (<code>commandId</code>)</td></tr>
+<tr><td>1.15</td><td>Formatted message (<code>errorMessageMarkdown</code>); programmatic send (<code>sendAsync</code>)</td></tr>
+<tr><td>1.8</td><td>Optional <strong>Exceptional send</strong> (<code>item.internetHeaders</code>), only if <code>bypass.enabled</code></td></tr>
+<tr><td>1.11</td><td><code>item.sessionData</code> fallback channel of the exceptional send</td></tr>
+<tr><td>NestedAppAuth 1.1</td><td>MFA step of the exceptional send (<code>bypass.mfa.required</code>), otherwise the message "does not allow the exceptional send"</td></tr>
+</tbody>
+</table></div>
+<h3 id="runtimes">2.5 Runtimes</h3>
+<p>Classic Outlook for Windows has no DOM, no <code>localStorage</code> and no ES modules for event handlers. The code reachable from <code>src/launchevent/</code> is bundled into <strong>one classic <code>launchevent.js</code></strong> (ES5, ASCII, no import at runtime), which <code>npm run build</code> verifies with <code>tools/check-bundle.js</code>. The browser runtime (web, new Outlook, Mac) loads the same bundle from <code>commands.html</code>. The task pane is hand-written Fluent 2 CSS with light and dark tokens (contrast AA enforced by <code>tests/theme.test.js</code>), no UI library.</p>
+</div></section><section class="section" id="things-to-know"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></div><div><div class="section-eyebrow">Chapter 3</div><h2>Things to know</h2></div></div><div class="section-body">
+<div class="cards"><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="card-title">SoftBlock</div><div class="card-text">If the add-in cannot load, Outlook lets the message go. The <code>Block</code> mode is not allowed in the marketplaces.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 5.5 5"/></svg></div><div><div class="card-title">Deployed by an administrator</div><div class="card-text">Event-based add-ins fire only when deployed by an administrator (or sideloaded on a test mailbox).</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><div class="card-title">Local time of the client</div><div class="card-text">No time zone of the recipient. No public holidays.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><div class="card-title">Mobile not covered</div><div class="card-text">Smart Alerts are not supported on Outlook for Android and iOS.</div></div></div></div>
+<ul>
+<li><strong>Meetings cannot be delayed</strong>: on a blocked day the invitation is only blocked.</li>
+<li><strong>Offline</strong>: Smart Alerts need a connection. To enforce the check even offline, see the <code>OnSendAddinsEnabled</code> (web, new Outlook) and <code>OnSendAddinsWaitForLoad</code> (Mac) policies in the Microsoft documentation.</li>
+<li><strong>A delayed delivery set by the add-in is handled by the server</strong>: in classic Outlook for Windows the message is not in the Outbox and can no longer be edited; in other clients it stays in Drafts until the planned time.</li>
+<li><strong>No API clears <code>delayDeliveryTime</code> explicitly</strong>: "Remove the schedule" uses <code>setAsync(new Date(0))</code> (observed in Outlook on the web: <code>getAsync</code> then returns 0) and checks; on failure the user is sent to the native "Delay delivery". <code>setAsync(0)</code> and <code>setAsync(null)</code> throw.</li>
+<li><strong>One <code>OnMessageSend</code> and one <code>OnAppointmentSend</code> per add-in.</strong></li>
+<li><strong>Per-mailbox server installation</strong> with <code>New-App -Mailbox</code> did <strong>not</strong> activate the Smart Alerts in Outlook on the web in our tests. Use the sideload (one person) or the centralized deployment.</li>
+<li>Feature detection: Mailbox 1.13, 1.14 and 1.15 are tested with <code>Office.context.requirements.isSetSupported</code>; <code>Office</code> is read at call time, never at import time.</li>
+</ul>
+</div></section><div class="part" id="part-ii-set-up"><span class="part-label">Part II</span><span class="part-name">Set up</span></div>
+<section class="section" id="prerequisites"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10"/><path d="m3.5 6 1.5 1.5L8 4.5M3.5 12l1.5 1.5L8 10.5M3.5 18l1.5 1.5L8 16.5"/></svg></div><div><div class="section-eyebrow">Chapter 4</div><h2>Prerequisites</h2></div></div><div class="section-body">
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Item</th><th>Requirement</th></tr>
+</thead>
+<tbody>
+<tr><td>PowerShell</td><td><strong>7.4 or later</strong> (<code>pwsh</code>) for the deploy script.</td></tr>
+<tr><td>Node.js</td><td><strong>22 or later</strong>, with <code>npm</code> (<code>engines</code> in <code>package.json</code>).</td></tr>
+<tr><td>Azure CLI</td><td><code>az</code>, signed in (<code>az login</code>), on the right subscription. The <code>application-insights</code> extension is installed by the script when the MFA level needs it.</td></tr>
+<tr><td>Azure rights</td><td><strong>Contributor</strong> on the subscription to create a resource group and a Static Web App (not needed with <code>-SkipInfra</code>). The <code>Microsoft.Web</code> provider must be registered (<code>az provider register --namespace Microsoft.Web</code>).</td></tr>
+<tr><td>Microsoft 365 rights</td><td><strong>Global Administrator</strong> or <strong>Exchange Administrator</strong> to publish the manifest in <em>Integrated apps</em>.</td></tr>
+<tr><td>Outlook</td><td>Web, new Outlook for Windows, classic Outlook for Windows 2206 or later (2412 for the <em>Take Action</em> button), Outlook for Mac (new interface). Exchange Online mailbox for production (Exchange 2019 CU12+ or 2016 CU22+ with classic Outlook, see the Smart Alerts documentation).</td></tr>
+<tr><td>Entra ID (MFA level only)</td><td>An app registration, an authentication context and a Conditional Access policy: Microsoft Entra ID <strong>P1</strong>. See chapter 9.</td></tr>
+</tbody>
+</table></div>
+<p>The deploy script prints this as a <strong>checklist</strong> at the start (step 1/6) and, for every missing item, a <em>What to do</em> line. In simulation (<code>-WhatIf</code>) a missing Azure item is a warning; a missing Node.js or npm always stops the script.</p>
+</div></section><section class="section" id="environments-and-settings"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></div><div><div class="section-eyebrow">Chapter 5</div><h2>Environments and settings</h2></div></div><div class="section-body">
+<p>An <strong>environment</strong> is one JSON file that describes a complete installation: display name, <strong>add-in Id</strong> (a GUID unique per environment), manifest version, Azure resources, rules and fallback language. The schema is <code>deploy/environment.schema.json</code>; the checks are in <code>tools/env-config.js</code>.</p>
+<h3 id="where-the-files-are">5.1 Where the files are</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Folder</th><th>Content</th></tr>
+</thead>
+<tbody>
+<tr><td><code>deploy/environments/</code></td><td>Files shipped with the project: <code>example.json</code> (the template that <code>New-NoFridayMailEnvironment.ps1</code> copies; never deployed as is) and <code>prod.json</code> (a production template with placeholder Azure names).</td></tr>
+<tr><td><code>deploy/environments.local/</code></td><td><strong>Your</strong> files (test, production, other companies). Never published (git-ignored). A file here wins over a file of the same name in <code>deploy/environments/</code>.</td></tr>
+<tr><td><code>NFM_ENVIRONMENTS_DIR</code></td><td>Variable that replaces both folders by a single one (used by the tests with <code>tests/fixtures/environments</code>).</td></tr>
+</tbody>
+</table></div>
+<p><code>npm run validate:env</code> validates every file (schema, coherence, unique <code>addinId</code>, unique Static Web App). <code>node tools/env-config.js &lt;name&gt; --deploy</code> additionally refuses a template <code>addinId</code> and the placeholder Entra identifiers of the MFA level.</p>
+<h3 id="one-environment-one-add-in-identity">5.1.1 One environment = one add-in identity</h3>
+<p>The <code>addinId</code> is the identity Outlook knows the add-in by. It follows two rules:</p>
+<ul>
+<li><strong>Stable.</strong> An environment keeps the same <code>addinId</code> for its whole life. The same Id means Outlook <em>updates</em> the add-in your users already have; a new Id on every deployment would install a <em>second</em> add-in for every user.</li>
+<li><strong>Unique.</strong> Two environments never share an <code>addinId</code>, otherwise they replace each other in the same Microsoft 365 tenant.</li>
+</ul>
+<p>So the Id is generated <strong>once</strong>, when the environment is created, and never at deployment time:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>.\tools\New-NoFridayMailEnvironment.ps1 -Name staging -WhatIf   # simulate: writes nothing
+.\tools\New-NoFridayMailEnvironment.ps1 -Name staging           # creates deploy\environments.local\staging.json</code></pre></div>
+<p>The script (PowerShell 7.4, house console format, <code>-WhatIf</code> supported) copies <code>example.json</code>, generates the Id with <code>[guid]::NewGuid()</code>, refuses an Id already used by a known environment, validates the content with the same code as the build (<code>node tools/env-config.js &lt;name&gt; --stdin</code>) and only then writes the file.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>-Name</code> (required)</td><td></td><td>Environment name = file name: lowercase letters, digits, dashes. Not <code>example</code>, not a name that already exists.</td></tr>
+<tr><td><code>-DisplayName</code></td><td><code>NoFridayMail (&lt;Name&gt;)</code></td><td>Name shown in Outlook.</td></tr>
+<tr><td><code>-ResourceGroup</code>, <code>-StaticWebAppName</code></td><td><code>rg-nofridaymail-&lt;Name&gt;</code>, <code>swa-nofridaymail-&lt;Name&gt;</code></td><td>Azure names.</td></tr>
+<tr><td><code>-Location</code></td><td><code>westeurope</code></td><td>Azure region.</td></tr>
+<tr><td><code>-SubscriptionId</code></td><td>none</td><td>Optional; otherwise the deployment uses the subscription of <code>az</code>.</td></tr>
+<tr><td><code>-BlockedDays</code></td><td><code>5</code></td><td>Forbidden days (<code>-BlockedDays 1,2</code>).</td></tr>
+<tr><td><code>-Path</code></td><td><code>deploy/environments.local/</code></td><td>Folder that receives <code>&lt;Name&gt;.json</code>.</td></tr>
+<tr><td><code>-AddinId</code></td><td>generated</td><td>Rarely needed: reuse the Id of an add-in that is already installed. A template value or an Id used by another environment is refused.</td></tr>
+<tr><td><code>-Force</code></td><td>off</td><td>Rewrites an existing file from the template and <strong>keeps its Id</strong>: an existing environment never changes identity.</td></tr>
+</tbody>
+</table></div>
+<p>Running it again for the same name without <code>-Force</code> refuses and leaves the file untouched.</p>
+<p><code>Deploy-NoFridayMail.ps1</code> never generates an Id. It stops, even with <code>-WhatIf</code>, when <code>addinId</code> is a template value (<code>11111111-2222-4333-8444-555555555555</code> of <code>example.json</code>, or the all-zero GUID) and prints the fix: create the environment with <code>New-NoFridayMailEnvironment.ps1</code>, or put the output of <code>[guid]::NewGuid()</code> in <code>addinId</code>. It also stops when another environment uses the same Id.</p>
+<h3 id="days-are-numbers">5.2 Days are numbers</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr><th style="text-align: center;">Number</th><th>Day</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: center;"><strong>0</strong></td><td>Sunday</td></tr>
+<tr><td style="text-align: center;"><strong>1</strong></td><td>Monday</td></tr>
+<tr><td style="text-align: center;"><strong>2</strong></td><td>Tuesday</td></tr>
+<tr><td style="text-align: center;"><strong>3</strong></td><td>Wednesday</td></tr>
+<tr><td style="text-align: center;"><strong>4</strong></td><td>Thursday</td></tr>
+<tr><td style="text-align: center;"><strong>5</strong></td><td>Friday</td></tr>
+<tr><td style="text-align: center;"><strong>6</strong></td><td>Saturday</td></tr>
+</tbody>
+</table></div>
+<h3 id="every-setting">5.3 Every setting</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Setting</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>name</code></td><td>Must be <strong>exactly the file name</strong> without <code>.json</code> (lowercase letters, digits, dashes, up to 31 characters).</td></tr>
+<tr><td><code>description</code></td><td>A memo for you. Ignored by the build.</td></tr>
+<tr><td><code>protected</code></td><td><code>true</code> marks an environment in service: the deploy script refuses it without <code>-ConfirmLab</code>.</td></tr>
+<tr><td><code>displayName</code></td><td>Name shown in Outlook and in the admin center. No <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code> or double quotes. Part of the manifest.</td></tr>
+<tr><td><code>addinId</code></td><td><strong>GUID unique per environment and stable for its whole life</strong>, generated once by <code>New-NoFridayMailEnvironment.ps1</code> (section 5.1.1). Never reuse it, never change it after users installed the add-in. Part of the manifest.</td></tr>
+<tr><td><code>version</code></td><td>Four numbers (<code>1.1.0.0</code>), each ≤ 65535, at least <code>1.0.0.0</code>. Raise it at each manifest change.</td></tr>
+<tr><td><code>providerName</code>, <code>supportUrl</code></td><td>Provider and support address (HTTPS) shown in the admin center.</td></tr>
+<tr><td><code>azure.subscriptionId</code></td><td>Optional. Targets a subscription; otherwise the one of <code>az login</code>.</td></tr>
+<tr><td><code>azure.resourceGroup</code>, <code>azure.location</code>, <code>azure.staticWebAppName</code>, <code>azure.sku</code></td><td>The resource group (created if missing), the region, the Static Web App (unique in Azure, 2 to 40 letters, digits, dashes) and the plan (<code>Free</code> or <code>Standard</code>).</td></tr>
+<tr><td><code>azure.appInsights</code></td><td>Optional. Application Insights resource for the log of the MFA API.</td></tr>
+<tr><td><code>rules.blockedDays</code></td><td><strong>Forbidden</strong> days. At least one working day must remain unblocked.</td></tr>
+<tr><td><code>rules.workingDays</code></td><td><strong>Offered</strong> days (default Monday to Friday).</td></tr>
+<tr><td><code>rules.sendHour</code>, <code>rules.sendMinute</code></td><td>Time of the two <strong>suggestions</strong>.</td></tr>
+<tr><td><code>rules.slotTimes</code></td><td>The time chips of the pane, <code>&quot;HH:mm&quot;</code> with two digits, 8 at most.</td></tr>
+<tr><td><code>rules.dayCount</code></td><td>Number of days in the row (1 to 10).</td></tr>
+<tr><td><code>bypass</code></td><td>Optional. Exceptional send (chapter 9). Absent means off.</td></tr>
+<tr><td><code>defaultLanguage</code></td><td>Fallback language, <code>fr</code> or <code>en</code>.</td></tr>
+</tbody>
+</table></div>
+<p>The build injects the rules into the bundle with webpack <code>DefinePlugin</code> as <code>__NFM_RULES__</code>. <code>BLOCKED_DAYS</code> and <code>WORKING_DAYS</code> remain optional build-time overrides (comma-separated integers 0 to 6, strictly validated; invalid values such as a duplicate, out of range or all seven days fail the build). <code>BYPASS_ENABLED=true|false</code> is only used by the preview tool.</p>
+<h3 id="when-must-the-manifest-be-published-again">5.4 When must the manifest be published again?</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>What you change</th><th>New manifest?</th><th>What happens</th></tr>
+</thead>
+<tbody>
+<tr><td>Blocked days, offered days, hours, number of days, fallback language</td><td><strong>No.</strong> Redeploy the site only.</td><td>The rules are in the hosted files (<code>launchevent.js</code>, <code>taskpane.js</code>). Users get them at the next load: a few minutes, sometimes after reopening Outlook. The Description and the button tooltip of the manifest also name the blocked days (generated by <code>tools/manifest-lib.js</code> from <code>blockedDays</code> and <code>workingDays</code>, with the same day names as the interface): upload the new manifest only if you want those two texts to match; the behavior does not depend on them.</td></tr>
+<tr><td>Display name, provider, support address, <strong>version</strong></td><td><strong>Yes</strong>: upload the new manifest (same add-in updated).</td><td>The admin center asks for the administrator's consent again; propagation up to 24 hours.</td></tr>
+<tr><td>Site address (new Static Web App)</td><td><strong>Yes</strong>: the manifest contains the addresses.</td><td>Same as above.</td></tr>
+<tr><td><strong><code>addinId</code></strong></td><td><strong>Yes, and it is another add-in.</strong></td><td>Outlook sees a <em>new</em> add-in. The old one stays installed until removed: remove it, otherwise both fire.</td></tr>
+</tbody>
+</table></div>
+<h3 id="classic-pitfalls">5.5 Classic pitfalls</h3>
+<ul>
+<li><strong>Never reuse an <code>addinId</code>, never change it once installed.</strong> The build refuses two environments with the same GUID. Different Ids are what allows a test and a production add-in in the same tenant (do not give both to the same users: they would see two checks); a stable Id is what makes a redeployment an update.</li>
+<li><strong>If you also use a transport rule, change the blocked day there too</strong>, or the two layers disagree. A deployment for another day (for example <code>New-NoFridayMailEnvironment.ps1 -Name notuesday -DisplayName &quot;NoTuesdayEmail&quot; -BlockedDays 2</code>) gets a manifest whose Description and tooltip say Tuesday; the Exchange rule must be aligned with the same day.</li>
+<li><strong><code>name</code> equals the file name.</strong> Keep JSON syntax: straight quotes, commas between items, none after the last one. <code>npm run validate:env</code> says where the error is.</li>
+<li><strong>Raise <code>version</code></strong> at each manifest change, or the admin center may refuse the update.</li>
+<li><strong>A Saturday is not blocked.</strong> To block the weekend too, add 6 and 0 (<code>[0, 5, 6]</code>).</li>
+</ul>
+</div></section><section class="section" id="build-and-deploy"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="7" rx="2"/><rect x="4" y="14" width="16" height="7" rx="2"/><path d="M8 6.5h.01M8 17.5h.01"/></svg></div><div><div class="section-eyebrow">Chapter 6</div><h2>Build and deploy</h2></div></div><div class="section-body">
+<div class="flow"><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg></div><div class="flow-title">Environment file</div><div class="flow-text">`deploy/environments*/&lt;env&gt;.json`</div></div><div class="flow-arrow"><span class="flow-label">npm run build:prod</span><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M31 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="flow-sub">validate, inject the rules, generate the manifest</span></div><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="flow-title">`dist/&lt;env&gt;/` and `out/`</div><div class="flow-text">site, `manifest.prod.xml`, `NoFridayMail-&lt;env&gt;-&lt;version&gt;.zip`</div></div><div class="flow-arrow"><span class="flow-label">Deploy-NoFridayMail.ps1</span><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M31 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="flow-sub">SWA CLI with a token read at run time</span></div><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="7" rx="2"/><rect x="4" y="14" width="16" height="7" rx="2"/><path d="M8 6.5h.01M8 17.5h.01"/></svg></div><div class="flow-title">Azure Static Web Apps</div><div class="flow-text">the site (and the API with the MFA level)</div></div><div class="flow-arrow"><span class="flow-label">admin center</span><svg viewBox="0 0 40 12" aria-hidden="true"><path d="M0 6h36M31 1l6 5-6 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="flow-sub">manual step</span></div><div class="flow-node"><div class="flow-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div class="flow-title">Outlook</div><div class="flow-text">add-in available to the chosen users</div></div></div>
+<h3 id="build">6.1 Build</h3>
+<p><code>npm run build:prod -- --env &lt;name&gt;</code> (or <code>NFM_ENV=&lt;name&gt;</code>) needs <code>ADDIN_BASE_URL</code>, the HTTPS origin of the site without path. It validates the environment strictly, injects the rules, writes <code>dist/&lt;env&gt;/</code> (bundles, pages, icons, <code>staticwebapp.config.json</code>, <code>manifest.prod.xml</code>) and the artifact <code>out/NoFridayMail-&lt;env&gt;-&lt;version&gt;.zip</code> (<code>site/</code>, <code>manifest.xml</code>, <code>DEPLOY.txt</code>). <code>npm run validate:prod -- --env &lt;name&gt;</code> validates the generated manifest. Without an environment, <code>npm run build</code> produces a development-flavoured <code>dist/</code> for tests.</p>
+<h3 id="the-deploy-script">6.2 The deploy script</h3>
+<p><code>tools/Deploy-NoFridayMail.ps1 -Environment &lt;name&gt;</code> runs six stages:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Stage</th><th>What it does</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>1/6 Prerequisites</strong></td><td>Checklist: PowerShell, Node.js 22+, npm, Azure CLI, session, subscription, <code>application-insights</code> extension (installed by itself, without a question, when the MFA level needs it; announced only in <code>-WhatIf</code>). If <code>PackageIntegrity.psd1</code> is present (release ZIP) the package is verified before anything else.</td></tr>
+<tr><td><strong>2/6 Azure infrastructure</strong></td><td>Creates the resource group and the Static Web App if missing (otherwise reuses them), reads the site address (<code>ADDIN_BASE_URL</code>). With the MFA level: creates <code>NFM_RECEIPT_KEY</code> only if missing and links Application Insights.</td></tr>
+<tr><td><strong>3/6 Build and validation</strong></td><td><code>npm ci</code>, <code>npm test</code> (skipped with an explanation when <code>tests/</code> is not shipped, or with <code>-SkipTests</code>), <code>npm run build:prod</code>, <code>npm run validate:prod</code>.</td></tr>
+<tr><td><strong>4/6 API package</strong></td><td>MFA level only: a self-contained package <code>out/api-pkg/&lt;env&gt;</code>.</td></tr>
+<tr><td><strong>5/6 Deployment</strong></td><td><code>npx --yes @azure/static-web-apps-cli@&lt;pinned&gt; deploy ./dist/&lt;env&gt; --env production --swa-config-location ./dist/&lt;env&gt;</code> (plus the API flags). The line is printed (<code>Command: npx ...</code>) and contains no secret.</td></tr>
+<tr><td><strong>6/6 Post-deployment checks</strong></td><td>HTTP 200 on <code>manifest.prod.xml</code>, <code>launchevent.js</code>, <code>taskpane.html</code>, <code>commands.html</code>; the expected <code>blockedDays</code> in the served <code>launchevent.js</code>; the add-in Id in the served manifest; with the MFA level, <code>POST /api/bypass</code> without a token must answer <strong>401</strong>.</td></tr>
+</tbody>
+</table></div>
+<p>A final <em>Next steps</em> box gives the manifest path and the two ways to install (sideload, centralized).</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Parameter</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>-Environment</code></td><td>The environment name (file <code>&lt;name&gt;.json</code> in <code>deploy/environments.local/</code> or <code>deploy/environments/</code>). <code>example</code> is a template and is refused.</td></tr>
+<tr><td><code>-SkipInfra</code></td><td>Creates nothing in Azure: the Static Web App must exist (it is only read).</td></tr>
+<tr><td><code>-SkipTests</code></td><td>Does not run <code>npm test</code> (not recommended in production).</td></tr>
+<tr><td><code>-ConfirmLab</code></td><td>Explicit confirmation required for protected environments (<code>protected: true</code>).</td></tr>
+<tr><td><code>-WhatIf</code></td><td>Simulation: nothing is created, installed, built or deployed; only reads (tool versions, <code>az account show</code>, <code>az group exists</code>, <code>az staticwebapp show</code>).</td></tr>
+</tbody>
+</table></div>
+<p><strong>Secret hygiene.</strong> The deployment token is read at run time (<code>az staticwebapp secrets list</code>), passed to the child process by environment variable (<code>SWA_CLI_DEPLOYMENT_TOKEN</code>) and <strong>never written to disk or shown</strong>. The SWA CLI version is pinned (never <code>latest</code>). <code>NFM_RECEIPT_KEY</code> is generated with 32 random bytes, only if missing, passed with <code>--output none</code> and never printed, logged or written; errors never repeat the arguments of the command.</p>
+<p><strong>Roll back.</strong> The site is static: go back by deploying the previous version (a previous release ZIP, or a tag of the repository) with <code>-SkipInfra</code>; republish the previous manifest if it also changed.</p>
+<p><strong>Delete an environment</strong>, in this order: remove the add-in in the admin center; <code>az staticwebapp delete --name &lt;swa&gt; --resource-group &lt;rg&gt; --yes</code>; if the group is otherwise empty <code>az group delete --name &lt;rg&gt; --yes</code>; delete the environment file (and the GitHub Environment).</p>
+<h3 id="the-managed-api-mfa-level">6.3 The managed API (MFA level)</h3>
+<p>The <code>api/</code> folder (Node 22, Azure Functions programming model v4, Static Web Apps managed functions, Free plan) exists only for environments with <code>bypass.mfa.required: true</code>; the deployment of the API is automatic. The SWA CLI runs <strong>no Oryx build</strong>, so the script deploys a <strong>self-contained package</strong> <code>out/api-pkg/&lt;env&gt;</code> (the code, a generated <code>config.json</code>, <code>shared/</code> and the <code>node_modules</code> installed by <code>npm ci --omit=dev</code>), with <code>--api-location ./out/api-pkg/&lt;env&gt;</code> and <code>--swa-config-location ./dist/&lt;env&gt;</code>, so that <code>platform.apiRuntime: node:22</code> and the <code>/api/*</code> route of the generated site configuration apply. <code>api/</code> itself stays clean for git. The load of the function from the installed package is verified before deployment (<code>node tools/package-api.js &lt;env&gt; --verify</code>). <code>host.json</code> has no <code>extensionBundle</code>: a Node HTTP function (model v4) uses no binding extension.</p>
+</div></section><section class="section" id="publish-the-manifest"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8" r="1.5"/></svg></div><div><div class="section-eyebrow">Chapter 7</div><h2>Publish the manifest</h2></div></div><div class="section-body">
+<p>Publishing is manual on purpose: it needs an administrator and a consent. The manifest is <code>dist/&lt;env&gt;/manifest.prod.xml</code> (also <code>manifest.xml</code> in the ZIP of <code>out/</code>).</p>
+<p><strong>Centralized (production, many users).</strong> Microsoft 365 admin center › <strong>Settings</strong> › <strong>Integrated apps</strong> › <strong>Upload custom apps</strong> › app type <strong>Office Add-in</strong> › the manifest file › assign <strong>users or groups</strong> (start with a pilot group) › accept the permissions (<code>ReadWriteItem</code>) › finish. Propagation: <strong>up to 24 hours</strong>; a user may have to reopen Outlook. An automated publication with <code>New-App</code> is not provided: Microsoft recommends <em>Integrated apps</em> for event-based add-ins, and a per-mailbox <code>New-App -Mailbox</code> did not activate the Smart Alerts in our tests.</p>
+<p><strong>Update.</strong> Open the add-in in <em>Integrated apps</em> and upload the new manifest: <strong>same <code>addinId</code>, higher <code>version</code></strong>. Any manifest change needs the administrator's consent again; until then users of the organization may be blocked.</p>
+<p><strong>Local (test, one person).</strong> Outlook on the web: <code>https://aka.ms/olksideload</code> › <strong>My add-ins</strong> › <strong>Custom add-ins</strong> › <strong>Add a custom add-in</strong> › <strong>Add from file</strong>. Classic Outlook: <em>Get Add-ins</em> › <strong>My add-ins</strong> › <strong>Custom add-ins</strong> › <strong>Add a custom add-in</strong> › <strong>Add from file</strong>. Take the file on disk, or use <strong>Save link as</strong> on the website: <strong>never Ctrl+S on the displayed XML</strong>, which saves the rendered page. For a developer's <code>https://localhost:3000</code> flow: <code>npm run start</code> (loads <code>manifest.xml</code> with <code>office-addin-debugging</code>), <code>npm run stop</code>; the first launch asks to install the development certificate of <code>office-addin-dev-certs</code>.</p>
+</div></section><div class="part" id="part-iii-use"><span class="part-label">Part III</span><span class="part-name">Use</span></div>
+<section class="section" id="everyday-use"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg></div><div><div class="section-eyebrow">Chapter 8</div><h2>Everyday use</h2></div></div><div class="section-body">
+<div class="table-wrap"><table>
+<thead>
+<tr><th>To do</th><th>Command</th></tr>
+</thead>
+<tbody>
+<tr><td>Simulate</td><td><code>pwsh tools/Deploy-NoFridayMail.ps1 -Environment &lt;name&gt; -WhatIf</code></td></tr>
+<tr><td>Deploy or update</td><td><code>pwsh tools/Deploy-NoFridayMail.ps1 -Environment &lt;name&gt;</code></td></tr>
+<tr><td>Update a site that exists</td><td><code>... -SkipInfra</code></td></tr>
+<tr><td>Validate the environment files</td><td><code>npm run validate:env</code></td></tr>
+<tr><td>Build only</td><td><code>$env:ADDIN_BASE_URL='https://&lt;site&gt;'; npm run build:prod -- --env &lt;name&gt;</code></td></tr>
+<tr><td>Validate the generated manifest</td><td><code>npm run validate:prod -- --env &lt;name&gt;</code></td></tr>
+<tr><td>See the pane without Outlook</td><td><code>npm run preview</code></td></tr>
+<tr><td>Read the help of the script</td><td><code>Get-Help .\tools\Deploy-NoFridayMail.ps1 -Full</code></td></tr>
+</tbody>
+</table></div>
+<p><code>npm run preview</code> builds the pane and writes <code>dist/preview.html</code> (the real pane with a fake Office object, driven by the query, for example <code>?theme=dark&amp;lang=en&amp;state=sending</code>), <code>dist/preview-gallery.html</code> and <code>previews/taskpane-preview.html</code> (a standalone file showing light and dark, French and English). These files are never referenced by the manifest and never produced by <code>build</code> or <code>build:prod</code>: do not deploy them. The Smart Alerts dialog is drawn by Outlook and is not customizable.</p>
+</div></section><section class="section" id="exceptional-send"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/></svg></div><div><div class="section-eyebrow">Chapter 9</div><h2>Exceptional send</h2></div></div><div class="section-body">
+<p>This chapter describes the option <strong>Exceptional send</strong> and, above all, what the <strong>server</strong> does. To turn it on step by step, see the <a href="NoFridayMail-UserGuide.html#change-the-settings">user guide, chapter 7</a>.</p>
+<h3 id="like-to-a-5-year-old">9.1 Like to a 5-year-old</h3>
+<p>On a blocked day the add-in is a <strong>doorman</strong>: "No, not today." The exceptional-send option says: "If it is really urgent, <strong>write why</strong> on a paper."</p>
+<p>There are two levels:</p>
+<ol>
+<li><strong>Level 1, the justification alone</strong> (<code>bypass</code> without <code>mfa</code>). The doorman sticks the paper on the message. Quick, but anyone can write anything: the paper does not prove <strong>who</strong> wrote it.</li>
+<li><strong>Level 2, justification + "identity card"</strong> (<code>bypass.mfa.required: true</code>). Before sticking the paper, the doorman sends the person to the <strong>security desk</strong> (Microsoft Entra ID): "Show me it is really you, with your code or your phone (MFA)." If it is fine, the desk writes the request in its <strong>book</strong> (the API of the site) and hands back a <strong>numbered ticket</strong> (the <em>receipt</em>). The doorman sticks the paper <strong>and</strong> the ticket on the message.</li>
+</ol>
+<p>In both cases the add-in <strong>never decides</strong> whether the person is allowed. <strong>Exchange</strong> (the "director") looks at the list of allowed people. Not on the list: refused anyway. And everything is <strong>logged</strong>: the paper, the ticket, who, when, from where.</p>
+<h3 id="overview-level-2">9.2 Overview (level 2)</h3>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code> 1. The user writes the justification in the pane and clicks &quot;Verify my identity and send&quot;.
+ 2. The pane asks Entra ID for a token (NAA, MSAL): silent, otherwise an MFA window
+    (authentication context c1: &quot;MFA every time&quot;).
+ 3. The pane calls  POST /api/bypass  (same site) with the token + the justification.
+        API: valid token? (signature, issuer, audience, scope, context c1)    no -&gt; 401
+             valid justification? (same rules as the pane)                    no -&gt; 400
+             key NFM_RECEIPT_KEY present?                                     no -&gt; 500
+        API: log line &quot;NFM_BYPASS {...}&quot; (Application Insights), then answer 200 { receipt }
+ 4. The pane clears the delayed delivery, sets  X-NoFriday-Bypass: v2; &lt;justification&gt;; r=&lt;receipt&gt;,
+    reads it back, then sends (sendAsync) or asks to click Send.
+ 5. OnMessageSend (add-in): blocked day + well-formed v2 header (recent receipt)? -&gt; the message leaves.
+ 6. Exchange, transport rule FRIDAY-43:
+        compliant v2 header AND sender member of GRP-NoFriday-Bypass?
+            yes -&gt; X-Friday-Exempt: Bypass + incident report + severity High -&gt; the message leaves
+            no  -&gt; the blocking rules apply: the message is refused
+ 7. Purview DLP: alert + incident report for every message carrying X-NoFriday-Bypass (no blocking).</code></pre></div>
+<p>The add-in <strong>cannot verify the signature of the receipt</strong> (it holds no secret). It only checks its <strong>form</strong> and its <strong>date</strong> (less than one day old). The guarantee is <strong>server side</strong>: the API log, the check of the receipt with <code>tools/verify-receipt.js</code>, and the correlation between "receipts seen in messages" and "receipts issued by the API".</p>
+<h3 id="the-header-contract">9.3 The header contract</h3>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>X-NoFriday-Bypass: v1; &lt;justification, percent-encoded&gt;
+X-NoFriday-Bypass: v2; &lt;justification, percent-encoded&gt;; r=&lt;receipt&gt;</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Element</th><th>Rule</th></tr>
+</thead>
+<tbody>
+<tr><td>Name</td><td><code>X-NoFriday-Bypass</code></td></tr>
+<tr><td>Version</td><td>exact prefix <code>v1; </code> or <code>v2; </code> ("v", digit, semicolon, one space)</td></tr>
+<tr><td>Justification</td><td>the typed text, <strong>cleaned</strong> (leading and trailing spaces removed, inner blanks and line breaks reduced to one space), then encoded</td></tr>
+<tr><td>Encoding</td><td>UTF-8 percent-encoding (as <code>encodeURIComponent</code>) for non-ASCII characters, control characters, <code>;</code> and <code>%</code>. The rest of printable ASCII, spaces included, stays readable</td></tr>
+<tr><td>Form</td><td>a single ASCII line; the encoded text contains no <code>;</code> (the <code>;</code> separates the version, then the receipt)</td></tr>
+<tr><td>Receipt (v2)</td><td><code>r=&lt;id&gt;.&lt;ts&gt;.&lt;sig&gt;</code>: <code>id</code> = 12 base64url characters, <code>ts</code> = seconds since 1970 (10 digits), <code>sig</code> = 22 base64url characters</td></tr>
+</tbody>
+</table></div>
+<p>Examples:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>X-NoFriday-Bypass: v1; R%C3%A9ponse urgente client
+X-NoFriday-Bypass: v2; R%C3%A9ponse urgente au client Durand; r=abcDEF123456.1793356768.QWERTYuiopASDFghjklZXC</code></pre></div>
+<p>Decode with <code>[uri]::UnescapeDataString('R%C3%A9ponse urgente client')</code>, or <code>decodeHeaderValue()</code> in <code>src/shared/bypass.js</code>.</p>
+<p><strong>The receipt (v2).</strong></p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>receipt = &lt;id&gt;.&lt;ts&gt;.&lt;sig&gt;
+sig     = first 22 characters of base64url( HMAC-SHA256( NFM_RECEIPT_KEY, &quot;&lt;id&gt;.&lt;ts&gt;.&lt;oid&gt;.&lt;sha256(justification)&gt;&quot; ) )</code></pre></div>
+<ul>
+<li><code>oid</code> = the Entra object id of the user (in the token);</li>
+<li><code>sha256(justification)</code> = lowercase hexadecimal SHA-256 of the <strong>cleaned</strong> justification (UTF-8);</li>
+<li>the key <code>NFM_RECEIPT_KEY</code> never leaves the server: not in a log, not in an answer, not in the add-in.</li>
+</ul>
+<p>A receipt is therefore <strong>bound</strong> to a person (oid) and to a precise text: it cannot be pasted on another text nor reused in someone else's name without the verification failing.</p>
+<h3 id="what-the-add-in-checks-user-side">9.4 What the add-in checks (user side)</h3>
+<p>The same pure function, <code>validateJustification()</code> (<code>src/shared/bypass.js</code>), serves the pane (button disabled while the input is weak), the <code>OnMessageSend</code> handler (header read back) <strong>and the API</strong> (a generated copy in <code>api/shared/</code>). Settings in the <code>bypass</code> object of the environment:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Setting</th><th style="text-align: center;">Default</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td><code>enabled</code></td><td style="text-align: center;"><code>false</code></td><td><code>true</code> = the option exists; <code>false</code> or no block = it does not. Only mandatory field.</td></tr>
+<tr><td><code>minLength</code></td><td style="text-align: center;">20</td><td>minimum characters, after cleaning</td></tr>
+<tr><td><code>maxLength</code></td><td style="text-align: center;">200</td><td>maximum characters</td></tr>
+<tr><td><code>minWords</code></td><td style="text-align: center;">3</td><td>number of words with at least 3 letters (Latin letters, French accents included); <code>0</code> disables the check</td></tr>
+<tr><td><code>minDistinctChars</code></td><td style="text-align: center;">6</td><td>different letters (case-insensitive): refuses "test test test test"; <code>0</code> disables the check</td></tr>
+<tr><td>(fixed)</td><td style="text-align: center;"></td><td>refusal of the same character repeated more than 4 times in a row ("....." , "aaaaa")</td></tr>
+<tr><td><code>mfa</code></td><td style="text-align: center;">absent</td><td>Level 2 block: <code>required</code>, <code>tenantId</code>, <code>clientId</code>, <code>authContext</code> (<code>c</code> + 1 to 99, default <code>c1</code>)</td></tr>
+</tbody>
+</table></div>
+<p>This check stops laziness ("." , "aaaaaaaaaaaaaaaaaaaa"), not bad faith: someone who writes three hollow words will pass. The real guarantee is <strong>server side</strong>.</p>
+<p><strong>What <code>OnMessageSend</code> does.</strong></p>
+<ol>
+<li>Allowed day: nothing special, the headers are not even read.</li>
+<li>Blocked day, <code>bypass.enabled</code>, Mailbox 1.8 (<code>item.internetHeaders</code>): the handler reads <code>X-NoFriday-Bypass</code>:
+<ul>
+<li><strong>without <code>mfa.required</code></strong>: a well-formed <code>v1; ...</code> or <code>v2; ...; r=&lt;receipt&gt;</code> with a justification that passes <code>validateJustification</code> lets the message leave;</li>
+<li><strong>with <code>mfa.required</code></strong>: <strong>only</strong> <code>v2</code>, with a receipt of the form <code>^[A-Za-z0-9_-]{12}\.\d{10}\.[A-Za-z0-9_-]{22}$</code> dated less than one day from the clock of the machine, and a valid justification. A <code>v1</code> header is <strong>blocked</strong>;</li>
+<li>anything else (absent, malformed, too weak, read error): normal blocking, with a mention of the option.</li>
+<li><strong>Case-insensitive header name</strong>: depending on the client (Outlook on the web...), <code>X-NoFriday-Bypass</code> may come back in lowercase; the pane and the handler compare names in lowercase.</li>
+<li><strong><code>sessionData</code> fallback channel</strong> (Mailbox 1.11): the pane also writes the same value to <code>item.sessionData</code> (key <code>nfm-bypass</code>) <strong>before</strong> <code>sendAsync</code>; the handler reads the Internet header first, then, if it is absent, malformed or unreadable, <code>sessionData</code> (same acceptance rule). <code>sessionData</code> is shared between the pane and the event runtime for the same draft: it avoids <code>OnMessageSend</code> running before it sees the header just written. <strong>The Internet header remains mandatory</strong>: it is what the Exchange transport rule reads on the sent message; <code>sessionData</code> only helps the client-side decision. "Remove the justification" also deletes the key.</li>
+<li><strong>Support code</strong> added to the dialog text <strong>only when a justification was found but refused</strong>: <code>code NFM-B2</code> malformed or weak (including a v1 when the MFA is required); <code>code NFM-B3</code> receipt malformed or older than one day. For an <strong>absent</strong> value or a <strong>refused read</strong> (Outlook on the web returns a failure for a missing key): <strong>no code</strong> (first request, the message is simply blocked); the handler only writes a <code>console.warn</code> trace ("no readable justification") without any value.</li>
+</ul></li>
+<li><strong>Meeting invitations</strong> (<code>OnAppointmentSend</code>) never go this way: an appointment has no <code>internetHeaders</code> and the handler reads nothing.</li>
+<li><code>sendAsync</code> (Mailbox 1.15) triggers <code>OnMessageSend</code> again: the handler is stateless, it reads the header again and lets the message go.</li>
+<li>If the user deletes the justification later, the header stays on the message until it is removed; the reopened pane shows "Justification saved" with "Remove the justification".</li>
+</ol>
+<p>The handler <strong>cannot</strong> verify the signature of the receipt (no client-side secret): an invented receipt of the right form passes the add-in. This is <strong>intended</strong>: the add-in is a comfort safeguard, not a proof. What really protects: the Exchange rule (group), the API log and the correlation (chapter 10).</p>
+<h3 id="the-api-post-api-bypass">9.5 The API <code>POST /api/bypass</code></h3>
+<p><strong>Request</strong>: <code>POST /api/bypass</code>, header <strong><code>X-NFM-Token: Bearer &lt;Entra v2 access token&gt;</code></strong> (and <strong>not</strong> <code>Authorization</code>: the managed functions of Static Web Apps <strong>replace</strong> that header by their own internal token, HS256, issuer <code>https://&lt;guid&gt;.scm.azurewebsites.net</code>, audience <code>https://&lt;guid&gt;.azurewebsites.net/azurefunctions</code>. The Entra token never arrives; the API ignores <code>Authorization</code> and only logs its presence, <code>authorizationHeaderIgnored</code>), body <code>{ &quot;justification&quot;: &quot;...&quot;, &quot;subjectHash&quot;: &quot;...&quot; }</code> (<code>subjectHash</code> optional, 128 base64/base64url characters at most, logged for correlation).</p>
+<p><strong>Token checks</strong> (<code>jose</code>, public keys <code>https://login.microsoftonline.com/&lt;tenantId&gt;/discovery/v2.0/keys</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Check</th><th>Expected value</th></tr>
+</thead>
+<tbody>
+<tr><td>signature</td><td>RS256, key of the tenant</td></tr>
+<tr><td><code>iss</code></td><td><code>https://login.microsoftonline.com/&lt;tenantId&gt;/v2.0</code></td></tr>
+<tr><td><code>aud</code></td><td><code>&lt;clientId&gt;</code> or <code>api://&lt;clientId&gt;</code></td></tr>
+<tr><td><code>tid</code></td><td><code>&lt;tenantId&gt;</code></td></tr>
+<tr><td><code>scp</code></td><td>contains <code>access_as_user</code></td></tr>
+<tr><td><code>oid</code></td><td>present</td></tr>
+<tr><td><code>acrs</code></td><td>contains the configured authentication context (<code>c1</code>)</td></tr>
+</tbody>
+</table></div>
+<p><strong>Answers</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th style="text-align: center;">Status</th><th>When</th><th>Body</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: center;">200</td><td>everything is fine</td><td><code>{ &quot;receipt&quot;: &quot;&lt;id&gt;.&lt;ts&gt;.&lt;sig&gt;&quot;, &quot;ts&quot;: 1793356768 }</code></td></tr>
+<tr><td style="text-align: center;">400</td><td>weak justification or invalid body</td><td><code>{ &quot;error&quot;: &quot;invalid_justification&quot;, &quot;code&quot;: &quot;short|long|repeat|words|distinct|empty&quot; }</code> or <code>{ &quot;error&quot;: &quot;invalid_request&quot; }</code></td></tr>
+<tr><td style="text-align: center;">401</td><td>no <code>X-NFM-Token</code> (an <code>Authorization</code> alone does not count; log reason <code>missing_token</code>)</td><td><code>{ &quot;error&quot;: &quot;missing_token&quot; }</code> + <code>WWW-Authenticate: Bearer realm=&quot;nofridaymail&quot;</code></td></tr>
+<tr><td style="text-align: center;">401</td><td>invalid or expired token</td><td><code>{ &quot;error&quot;: &quot;invalid_token&quot; }</code> + <code>WWW-Authenticate: Bearer error=&quot;invalid_token&quot;</code></td></tr>
+<tr><td style="text-align: center;">401</td><td>valid token <strong>without</strong> the authentication context (MFA not played back)</td><td><code>{ &quot;error&quot;: &quot;insufficient_claims&quot; }</code> + <code>WWW-Authenticate: Bearer error=&quot;insufficient_claims&quot;, claims=&quot;&lt;base64&gt;&quot;</code></td></tr>
+<tr><td style="text-align: center;">405</td><td>method other than POST</td><td></td></tr>
+<tr><td style="text-align: center;">500</td><td>configuration or <code>NFM_RECEIPT_KEY</code> missing or too short</td><td><code>{ &quot;error&quot;: &quot;server_misconfigured&quot; }</code></td></tr>
+</tbody>
+</table></div>
+<p>The <code>claims</code> challenge is the JSON <code>{&quot;access_token&quot;:{&quot;acrs&quot;:{&quot;essential&quot;:true,&quot;value&quot;:&quot;c1&quot;}}}</code> in base64: the pane plays it back <strong>once</strong> to get a token with the context, then calls the API again.</p>
+<p><strong>Log</strong> (one line per receipt, prefix <code>NFM_BYPASS </code>, JSON): <code>receiptId</code>, <code>ts</code>, <code>upn</code>, <code>oid</code>, <code>tid</code>, <code>ip</code>, <code>justification</code> (full text), <code>sha256</code>, <code>authContext</code>, <code>userAgent</code>, <code>subjectHash</code>, <code>environment</code>, and for freshness <code>uti</code>, <code>iat</code>, <code>acrs</code>. Refusals have the prefix <code>NFM_BYPASS_DENIED </code> (reason, oid if known). <strong>Never</strong> the token nor the key.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Name</th><th>Where</th><th>Content</th><th>Who creates it</th></tr>
+</thead>
+<tbody>
+<tr><td><code>NFM_RECEIPT_KEY</code></td><td>application setting (<strong>secret</strong>)</td><td>base64 of at least 32 random bytes</td><td><code>tools/Deploy-NoFridayMail.ps1</code>, <strong>only if missing</strong> (value never shown); do not change it: old receipts could no longer be verified</td></tr>
+<tr><td><code>APPLICATIONINSIGHTS_CONNECTION_STRING</code></td><td>application setting</td><td>Application Insights connection string</td><td>the script, if <code>azure.appInsights</code> is set</td></tr>
+<tr><td><code>api/config.json</code></td><td><strong>generated</strong> file (git-ignored)</td><td><code>tenantId</code>, <code>clientId</code>, <code>authContext</code>, justification limits</td><td><code>npm run build:prod</code> (<code>tools/prepare-api.js</code>), from the environment file</td></tr>
+<tr><td><code>api/shared/bypass.js</code></td><td><strong>generated</strong> file</td><td>copy of <code>src/shared/bypass.js</code></td><td>same</td></tr>
+</tbody>
+</table></div>
+<p>No secret in a file: the key is only an application setting. To <strong>create the key by hand</strong> (without the script): <code>az staticwebapp appsettings set --name &lt;swa&gt; --resource-group &lt;rg&gt; --setting-names &quot;NFM_RECEIPT_KEY=&lt;base64 of 32 bytes&gt;&quot; --output none</code> (the default output of <code>az</code> would show the value: keep <code>--output none</code>).</p>
+<h3 id="entra-id-prerequisites-an-administrator-does-this">9.6 Entra ID prerequisites (an administrator does this)</h3>
+<p>One app registration <strong>per environment</strong>, which is both the <strong>client</strong> (NAA) and the <strong>API</strong>.</p>
+<ol>
+<li><strong>App registration</strong> (Entra ID › App registrations › New): single tenant. Note the <strong>Application (client) ID</strong> and the <strong>Tenant ID</strong> (Overview page).</li>
+<li><strong>Authentication</strong> › Add a platform › <strong>Single-page application</strong> (SPA): two redirect URIs, with the host name of the Static Web App (<code>&lt;swa-host&gt;</code>, for example <code>swa-nofridaymail-contoso.azurestaticapps.net</code>):
+<ul>
+<li><code>brk-multihub://&lt;swa-host&gt;</code></li>
+<li><code>https://&lt;swa-host&gt;/taskpane.html</code></li>
+</ul></li>
+<li><strong>Expose an API</strong>: Application ID URI <code>api://&lt;clientId&gt;</code>; add the scope <strong><code>access_as_user</code></strong> (admins and users). The same application is client <strong>and</strong> API, so there is nothing to pre-authorize.</li>
+<li><strong>Manifest</strong> of the registration: <code>requestedAccessTokenVersion</code> (or <code>accessTokenAcceptedVersion</code>) = <strong>2</strong> (v2 tokens, issuer <code>.../v2.0</code>).</li>
+<li><strong>API permissions</strong>: grant admin consent (scope <code>access_as_user</code> of your own application).</li>
+<li><strong>Authentication context</strong> (Entra ID › Protection › Conditional Access › Authentication contexts › New): ID <strong><code>c1</code></strong>, name "NoFriday: exceptional send", tick "Publish to apps". Another ID (<code>c2</code>...<code>c99</code>) works: put it in <code>authContext</code>.</li>
+<li><strong>Conditional Access policy</strong> "MFA, sign-in frequency every time":
+<ul>
+<li>Target resources: <strong>Authentication context</strong> › <code>c1</code>;</li>
+<li>Users: the allowed group (<code>GRP-NoFriday-Bypass</code>);</li>
+<li>Grant: <strong>Require multifactor authentication</strong>;</li>
+<li>Session: <strong>Sign-in frequency</strong> › <strong>Every time</strong>.</li>
+</ul></li>
+<li><strong>License</strong>: Microsoft Entra ID <strong>P1</strong> (Conditional Access and authentication contexts) for the people concerned.</li>
+<li><strong>Outlook</strong>: nested app authentication (NAA, requirement set <code>NestedAppAuth 1.1</code>) needs a recent Outlook (web, new Outlook, recent Windows). Otherwise the pane shows "Your version of Outlook does not allow the exceptional send" and no button.</li>
+</ol>
+<p>These are values <strong>you</strong> provide; none of this is created by the project. To validate in a test environment: the playback of the MFA by the NAA window and the presence of <code>acrs</code> in the token.</p>
+<p><strong>Fill in <code>mfa</code> in the environment file.</strong></p>
+<div class="code"><div class="code-head"><span>JSON</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>&quot;bypass&quot;: {
+  &quot;enabled&quot;: true,
+  &quot;mfa&quot;: {
+    &quot;required&quot;: true,
+    &quot;tenantId&quot;: &quot;&lt;Tenant ID: Entra ID &gt; Overview&gt;&quot;,
+    &quot;clientId&quot;: &quot;&lt;Application (client) ID of the registration&gt;&quot;,
+    &quot;authContext&quot;: &quot;c1&quot;
+  }
+}</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Value</th><th>Where to find it</th></tr>
+</thead>
+<tbody>
+<tr><td><code>tenantId</code></td><td>Entra ID › Overview › <strong>Tenant ID</strong></td></tr>
+<tr><td><code>clientId</code></td><td>the app registration › Overview › <strong>Application (client) ID</strong></td></tr>
+<tr><td><code>authContext</code></td><td>Conditional Access › Authentication contexts › <strong>ID</strong> column (<code>c1</code>...)</td></tr>
+</tbody>
+</table></div>
+<p>While <code>tenantId</code> and <code>clientId</code> hold <code>00000000-0000-0000-0000-000000000000</code> (<strong>placeholders</strong>), the build and <code>npm run validate:env</code> accept them, but <strong><code>Deploy-NoFridayMail.ps1</code> and the GitHub workflow refuse to deploy</strong> (message: "valeur de remplacement ... Renseignez l'ID de locataire ..."). Check with <code>node tools/env-config.js &lt;name&gt; --deploy</code>. With <code>required: true</code> the level-1 button disappears: the pane only offers "Verify my identity and send" and the add-in refuses messages without a ticket.</p>
+<h3 id="server-side-1-the-exchange-transport-rule-authorization-and-audit">9.7 Server side 1: the Exchange transport rule (authorization and audit)</h3>
+<p>Role: only the members of an authorized group can send on a blocked day.</p>
+<ol>
+<li>Create a security group, for example <code>GRP-NoFriday-Bypass</code>, and add the authorized people. <strong>It is the same group</strong> as the one targeted by the Conditional Access policy (step 7 above).</li>
+<li>Create the rule <strong>FRIDAY-43</strong>, with a priority <strong>lower in value (so higher in precedence)</strong> than the blocking rules (FRIDAY-40, FRIDAY-41):
+<ul>
+<li>condition: the header <code>X-NoFriday-Bypass</code> matches the pattern below <strong>and</strong> the sender is a member of <code>GRP-NoFriday-Bypass</code>;</li>
+<li>actions: add the header <strong><code>X-Friday-Exempt: Bypass</code></strong> (the exemption header already used, for example with <code>Meeting</code>), audit severity <strong>High</strong>, <strong>incident report</strong> to the compliance mailbox;</li>
+<li><strong>the blocking rules</strong> (FRIDAY-40, FRIDAY-41) have as exception the header <code>X-Friday-Exempt</code> containing <code>Bypass</code> (besides <code>Meeting</code>).</li>
+</ul></li>
+<li>A sender who is <strong>not</strong> a member does not trigger FRIDAY-43: the blocking rules apply and the message is refused.</li>
+</ol>
+<p><strong>Patterns of FRIDAY-43.</strong> Level 2 (<code>mfa.required</code>), v2 header with receipt, <strong>at least 20 characters</strong> and <strong>3 words of at least 3 letters</strong>:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>^v2; (?=.{20,}).*[A-Za-z]{3,}.* .*[A-Za-z]{3,}.* .*[A-Za-z]{3,}.*; r=[A-Za-z0-9_-]{12}\.\d{10}\.[A-Za-z0-9_-]{22}$</code></pre></div>
+<p>Level 1 (no MFA), v1 header:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>^(?=v1; .{20,}$)v1; .*[A-Za-z]{3,}.* .*[A-Za-z]{3,}.* .*[A-Za-z]{3,}</code></pre></div>
+<p>This is a <strong>rough mirror</strong> of the check of the add-in: regular expressions of transport rules are limited, and the server sees the <strong>encoded</strong> value (<code>R%C3%A9ponse</code>: only sequences of ASCII letters count; the encoded length is greater than or equal to the decoded length). It does not check the different letters nor the repetitions, and <strong>not the signature of the receipt</strong>: a regular expression cannot compute an HMAC. The <strong>user</strong> check is the add-in's; the <strong>authenticity</strong> check is the API log + <code>tools/verify-receipt.js</code>. Tests (<code>tests/bypass.test.js</code>) verify that every header produced by the add-in passes these patterns.</p>
+<p>The patterns of one condition are combined with <strong>OR</strong> in Exchange: to require both the form and the length, use the single patterns above (with lookahead), and check them in your tenant.</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code># Example (Exchange Online PowerShell, adapt it; never put credentials or certificates in the repository)
+$p = @{
+    HeaderMatchesMessageHeader = 'X-NoFriday-Bypass'
+    HeaderMatchesPatterns      = '^v2; (?=.{20,}).*[A-Za-z]{3,}.* .*[A-Za-z]{3,}.* .*[A-Za-z]{3,}.*; r=[A-Za-z0-9_-]{12}\.\d{10}\.[A-Za-z0-9_-]{22}$'
+    FromMemberOf               = 'GRP-NoFriday-Bypass'
+    SetHeaderName              = 'X-Friday-Exempt'
+    SetHeaderValue             = 'Bypass'
+    SetAuditSeverity           = 'High'
+    GenerateIncidentReport     = 'compliance@example.com'
+    IncidentReportContent      = 'Sender','Recipients','Subject','Severity','RuleDetections','AttachOriginalMail'
+}
+New-TransportRule -Name 'FRIDAY-43 Justified bypass (group)' -Priority 11 @p
+foreach ($r in 'FRIDAY-40 REGEX Block TZ-CET', 'FRIDAY-41 ACTEXP Block TZ-CET-PROD') {
+    Set-TransportRule $r -ExceptIfHeaderContainsMessageHeader 'X-Friday-Exempt' -ExceptIfHeaderContainsWords 'Meeting','Bypass'
+}</code></pre></div>
+<h3 id="server-side-2-purview-dlp-compliance-trace">9.8 Server side 2: Purview DLP (compliance trace)</h3>
+<p>Role: keep a trace of <strong>every</strong> occurrence of the header, allowed or not, <strong>without blocking</strong>. Pattern: <code>^v[12]; </code> (v1 <strong>and</strong> v2).</p>
+<ul>
+<li>A DLP policy on Exchange, mode "On".</li>
+<li>Rule: condition <strong><code>HeaderMatchesPatterns</code></strong> on <code>X-NoFriday-Bypass</code>, actions: <strong>alert</strong> (severity High) and <strong>incident report</strong> to the compliance mailbox, <strong>no blocking action</strong>.</li>
+</ul>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>New-DlpCompliancePolicy -Name 'NoFriday - Bypass audit' -ExchangeLocation All -Mode Enable
+New-DlpComplianceRule -Name 'NoFriday - Bypass header' -Policy 'NoFriday - Bypass audit' `
+    -HeaderMatchesPatterns @{ 'X-NoFriday-Bypass' = '^v[12]; ' } `
+    -GenerateAlert 'compliance@example.com' -ReportSeverityLevel High `
+    -GenerateIncidentReport 'compliance@example.com' -IncidentReportContent All</code></pre></div>
+<h3 id="known-limits-read-before-turning-it-on">9.9 Known limits (read before turning it on)</h3>
+<ol>
+<li><strong>The header can be set by a tool other than the add-in</strong> (an alternative mail client, a script, an API). At level 1 nothing distinguishes it from a real one. At level 2 a header <strong>without an authentic receipt</strong> can be detected afterwards (correlation, <code>verify-receipt.js</code>) but is <strong>not blocked</strong> by the server (a transport rule does not compute an HMAC): that is why <strong>every occurrence is logged</strong> and <strong>the authorization rests on the Exchange group</strong> (the identity of the authenticated sender), never on the presence of the header.</li>
+<li>The quality check of the justification is an aid for the user, not a security barrier.</li>
+<li>The add-in is in <code>SoftBlock</code> mode (if it does not load, the send goes, as for the Friday rule).</li>
+<li>Without Mailbox 1.8 (<code>internetHeaders</code>) the section does not appear. With <code>mfa.required</code>, <code>NestedAppAuth 1.1</code> is also needed.</li>
+<li>The letter check covers the Latin alphabet (French, English, accents), not Greek, Cyrillic or CJK.</li>
+<li>Do not change <code>NFM_RECEIPT_KEY</code> lightly: receipts already issued could no longer be verified. A rotation is possible (a new key, the old one kept for offline verification).</li>
+</ol>
+</div></section><section class="section" id="finding-a-request"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></div><div><div class="section-eyebrow">Chapter 10</div><h2>Finding a request</h2></div></div><div class="section-body">
+<p>Four places, from the most precise to the widest. Table and column names may vary with your workspace: check them.</p>
+<h3 id="the-api-book-application-insights-who-when-what-why">10.1 The API book: Application Insights (who, when, what, why)</h3>
+<p>KQL queries (Application Insights › Logs):</p>
+<div class="code"><div class="code-head"><span>Kusto</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>// All requests (one line per issued receipt)
+traces
+| where message startswith &quot;NFM_BYPASS &quot;
+| extend e = parse_json(substring(message, strlen(&quot;NFM_BYPASS &quot;)))
+| project timestamp, receiptId = tostring(e.receiptId), upn = tostring(e.upn), oid = tostring(e.oid),
+          ip = tostring(e.ip), justification = tostring(e.justification), sha256 = tostring(e.sha256),
+          authContext = tostring(e.authContext), subjectHash = tostring(e.subjectHash), userAgent = tostring(e.userAgent)
+| order by timestamp desc</code></pre></div>
+<div class="code"><div class="code-head"><span>Kusto</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>// The refusals (token without MFA, weak justification, configuration)
+traces
+| where message startswith &quot;NFM_BYPASS_DENIED &quot;
+| extend e = parse_json(substring(message, strlen(&quot;NFM_BYPASS_DENIED &quot;)))
+| project timestamp, reason = tostring(e.reason), detail = tostring(e.detail), code = tostring(e.code),
+          upn = tostring(e.upn), oid = tostring(e.oid), ip = tostring(e.ip)
+| order by timestamp desc</code></pre></div>
+<p>Without Application Insights (<code>azure.appInsights</code> not set), the same lines are in the log stream of the function (Azure portal › Static Web App › Functions / log stream).</p>
+<h3 id="the-proof-of-identity-entra-sign-in-logs">10.2 The proof of identity: Entra sign-in logs</h3>
+<div class="code"><div class="code-head"><span>Kusto</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>// Sign-ins to the application of the environment that satisfied the authentication context c1
+SigninLogs
+| where AppId == &quot;&lt;clientId&gt;&quot;
+| mv-expand ctx = AuthenticationContextClassReferences
+| where tostring(ctx.id) == &quot;c1&quot;
+| project TimeGenerated, UserPrincipalName, UserId, IPAddress, ConditionalAccessStatus, AuthenticationRequirement, ResultType
+| order by TimeGenerated desc</code></pre></div>
+<p><code>UserId</code> is the <code>oid</code> of the API log: the two must match (same person, same minute). In the portal: Entra ID › Sign-in logs › filter "Application" = the registration, detail › <strong>Conditional Access</strong> tab (the MFA policy applied).</p>
+<p><strong>Freshness of the MFA: the 5-minute window.</strong> <em>Like to a 5-year-old</em>: the MFA is a stamp on the hand. Entra does not ask for a new stamp if the previous one is <strong>less than 5 minutes</strong> old. Two exceptional sends of the same person 3 minutes apart share <strong>the same stamp</strong>; beyond that, a new stamp is required.</p>
+<p>The Conditional Access policy "sign-in frequency: <strong>every time</strong>" does not impose one MFA per token: the Microsoft documentation states that with "every time", Entra takes a clock skew of five minutes into account ("<em>doesn't prompt users more often than once every five minutes</em>", <a href="https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-session-lifetime" target="_blank" rel="noopener">Configure authentication session management with Conditional Access</a>). A second request within these 5 minutes therefore reuses the previous MFA ("Previously satisfied"), and the NAA window does not even need to ask for a code again.</p>
+<p><strong>The guarantee, stated precisely</strong>: each receipt is bound to an MFA satisfied by <strong>the same person (<code>oid</code>) at most about 5 minutes before</strong> the token was issued, not to an MFA performed for that send alone. Guaranteed: the receipt exists only if Entra issued a token carrying the authentication context <code>c1</code> (<code>acrs</code>) for that person. Not guaranteed: that the MFA is played back at each send within that window.</p>
+<p>To know, <strong>receipt by receipt</strong>, whether the MFA was <strong>freshly performed</strong> or <strong>reused</strong>, the API log contains the unique token identifier (<code>uti</code>, not secret), its issue time (<code>iat</code>) and the satisfied contexts (<code>acrs</code>): <code>uti</code> is the same value as the <code>UniqueTokenIdentifier</code> column of the Entra sign-in logs and the <code>uti</code> claim of the access token.</p>
+<div class="code"><div class="code-head"><span>Kusto</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>// For each receipt: was the MFA performed for this request, or &quot;already satisfied&quot;?
+// Needs the export of the Entra sign-in logs to Log Analytics (Entra ID &gt; Diagnostic settings:
+// SignInLogs and NonInteractiveUserSignInLogs), in the same workspace as the API traces (or a
+// cross-workspace query).
+let receipts = traces
+    | where message startswith &quot;NFM_BYPASS &quot;
+    | extend e = parse_json(substring(message, strlen(&quot;NFM_BYPASS &quot;)))
+    | project receiptTime = timestamp, receiptId = tostring(e.receiptId), upn = tostring(e.upn), oid = tostring(e.oid),
+              uti = tostring(e.uti), tokenIssuedAt = unixtime_seconds_todatetime(tolong(e.iat)), acrs = tostring(e.acrs);
+let signIns = union isfuzzy=true SigninLogs, AADNonInteractiveUserSignInLogs
+    | extend uti = tostring(UniqueTokenIdentifier)
+    | project uti, SignInTime = TimeGenerated, AuthenticationRequirement, ConditionalAccessStatus,
+              AuthenticationDetails, AuthenticationContextClassReferences, ResultType;
+receipts
+| join kind=leftouter signIns on uti
+| extend mfaDetail = tostring(AuthenticationDetails)
+| extend mfaFreshness = case(
+    isempty(SignInTime), &quot;no sign-in line (log not exported, or ingestion delay)&quot;,
+    mfaDetail has &quot;Previously satisfied&quot;, &quot;MFA already satisfied (reused, 5-minute window)&quot;,
+    mfaDetail has &quot;MFA&quot; or mfaDetail has &quot;Mobile app&quot; or mfaDetail has &quot;Text message&quot; or mfaDetail has &quot;Phone call&quot; or mfaDetail has &quot;FIDO&quot;, &quot;MFA performed for this request&quot;,
+    &quot;to examine&quot;)
+| project receiptTime, receiptId, upn, uti, tokenIssuedAt, SignInTime, AuthenticationRequirement, mfaFreshness, AuthenticationDetails
+| order by receiptTime desc</code></pre></div>
+<p>Without the export to Log Analytics: in the Entra portal (Entra ID › Sign-in logs, tabs "User sign-ins (interactive)" <strong>and</strong> "non-interactive"), add the filter <strong>Unique token identifier</strong> (the <code>uti</code> of the API log); in the <strong>Authentication details</strong> tab, a "Previously satisfied" line means a reused MFA, a line with a method (mobile app, SMS, FIDO...) means an MFA performed for that request.</p>
+<h3 id="the-message-exchange-and-dlp">10.3 The message: Exchange and DLP</h3>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code># Message trace, then detail: the FRIDAY-43 rule shows in the transport rule events
+$trace = Get-MessageTraceV2 -SenderAddress alice@contoso.com -StartDate (Get-Date).AddDays(-2) -EndDate (Get-Date)
+$trace | Get-MessageTraceDetailV2 | Where-Object { $_.Detail -like '*FRIDAY-43*' -or $_.Event -like '*Transport*' }
+
+# DLP alerts and reports (one line per message carrying the header)
+Search-UnifiedAuditLog -StartDate (Get-Date).AddDays(-7) -EndDate (Get-Date) -RecordType ComplianceDLPExchange -ResultSize 500 |
+    Select-Object CreationDate, UserIds, Operations, AuditData</code></pre></div>
+<p>The incident report sent to the compliance mailbox contains the sender, the subject and the header: that is where <code>X-NoFriday-Bypass: v2; ...; r=&lt;receipt&gt;</code> is read.</p>
+<h3 id="the-authenticity-of-a-receipt-tools-verify-receipt.js">10.4 The authenticity of a receipt: <code>tools/verify-receipt.js</code></h3>
+<p>With the header found in a message and the <code>oid</code> of the sender (API log or sign-in log):</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>$env:NFM_RECEIPT_KEY = '&lt;value of the application setting of the Static Web App&gt;'
+node tools/verify-receipt.js --header &quot;v2; R%C3%A9ponse urgente au client Durand; r=abcDEF123456.1793356768.QWERTYuiopASDFghjklZXC&quot; --oid aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee
+# or, in parts:
+node tools/verify-receipt.js --receipt abcDEF123456.1793356768.QWERTYuiopASDFghjklZXC --oid &lt;oid&gt; --justification &quot;Réponse urgente au client Durand&quot;</code></pre></div>
+<p>Answer: <code>VALIDE</code> (receipt, issue date, justification) or <code>INVALIDE</code> with the reason: malformed header, <strong>version 1</strong> (send without MFA step), malformed receipt, or <strong>signature that does not match</strong> (different oid or text, invented receipt, other key). Exit code: 0 valid, 1 invalid, 2 usage or key missing. The key is passed <strong>by environment variable only</strong> (<code>az staticwebapp appsettings list --name &lt;swa&gt; --resource-group &lt;rg&gt;</code> shows it: treat it as a password and paste it neither in a ticket nor in a file of the repository).</p>
+<h3 id="correlation-idea-microsoft-sentinel">10.5 Correlation idea (Microsoft Sentinel)</h3>
+<p><strong>A receipt seen in a message without a matching <code>NFM_BYPASS</code> line in the API log is suspect</strong>: either the receipt was invented, or the log was lost. Principle:</p>
+<ol>
+<li>import into a table (for example <code>NfmBypassMailHeaders_CL</code>) the receipts extracted from the FRIDAY-43 / DLP incident reports (<code>receiptId</code> = the first 12 characters of the receipt, <code>Sender</code>, <code>Subject</code>, time);</li>
+<li>compare with the issued receipts:</li>
+</ol>
+<div class="code"><div class="code-head"><span>Kusto</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>let issued = traces
+    | where message startswith &quot;NFM_BYPASS &quot;
+    | extend e = parse_json(substring(message, strlen(&quot;NFM_BYPASS &quot;)))
+    | project receiptId = tostring(e.receiptId), issuedAt = timestamp, oid = tostring(e.oid), upn = tostring(e.upn);
+NfmBypassMailHeaders_CL
+| join kind=leftanti issued on receiptId
+| project TimeGenerated, Sender, Subject, receiptId</code></pre></div>
+<p>Every returned line is an exceptional-send message <strong>without a receipt issued by the API</strong>: investigate (then <code>verify-receipt.js</code>). Conversely, an issued receipt never seen in a message is not abnormal (a request abandoned after the receipt). Add a scheduled analytics rule on this query.</p>
+</div></section><div class="part" id="part-iv-maintain"><span class="part-label">Part IV</span><span class="part-name">Maintain</span></div>
+<section class="section" id="download-packaging-and-integrity"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg></div><div><div class="section-eyebrow">Chapter 11</div><h2>Download, packaging and integrity</h2></div></div><div class="section-body">
+<h3 id="what-is-distributed">11.1 What is distributed</h3>
+<p>A public user can download only what is needed to <strong>deploy and use</strong> the add-in. Three channels carry the same set of files:</p>
+<div class="cards"><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg></div><div><div class="card-title">Release ZIP</div><div class="card-text"><code>NoFridayMail-&lt;version&gt;.zip</code> on the Releases page. Recommended. Owner-signed PowerShell files and <code>PackageIntegrity.psd1</code>.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div><div class="card-title">Download ZIP / <code>git archive</code></div><div class="card-text">The same files, built from the repository by <code>.gitattributes</code> <code>export-ignore</code> rules. No signature manifest.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></div><div><div class="card-title">Repository clone</div><div class="card-text">The same files plus the tests, the CI workflows and the developer tools.</div></div></div></div>
+<p>Shipped: <code>package.json</code> and lock file, <code>webpack.config.js</code>, <code>src/</code>, <code>api/</code>, the build tools (<code>tools/build*.js</code>, <code>env-config.js</code>, <code>manifest-lib.js</code>, <code>check-bundle.js</code>, <code>package-api.js</code>, <code>prepare-api.js</code>, <code>swa-config.js</code>, <code>validate-manifest.js</code>, <code>blocked-days.js</code>, <code>deploy-text.js</code>), <code>tools/verify-receipt.js</code> (the compliance team uses it), the deploy script, the environment generator <code>tools/New-NoFridayMailEnvironment.ps1</code> and the <code>tools/lib/</code> helpers, <code>tools/Test-PackageIntegrity.ps1</code>, <code>manifest.xml</code>, <code>staticwebapp.config.json</code>, the icons, <code>deploy/environment.schema.json</code>, <code>example.json</code> and <code>prod.json</code>, the documentation (Markdown and HTML), <code>README.md</code>, <code>LICENSE</code>, <code>THIRD-PARTY-NOTICES.md</code>, <code>SECURITY.md</code>, <code>CHANGELOG.md</code>. Kept in the repository only: <code>tests/</code> (with the fixtures), <code>.github/</code>, the preview and icon-generation tools, the documentation generator, the package builder, <code>AGENTS.md</code>, <code>PROVENANCE.md</code>. When <code>tests/</code> is absent the deploy script skips <code>npm test</code> and says so; the build and the validation still run.</p>
+<h3 id="integrity-and-signature-of-a-release">11.2 Integrity and signature of a release</h3>
+<p>The release ZIP is built from <code>git archive</code> of the reviewed revision (so it is identical to the repository download), plus <code>PackageIntegrity.psd1</code>: the SHA-256 of every file and the expected signer. <code>tools/Test-PackageIntegrity.ps1 -Root &lt;folder&gt;</code> verifies it: a valid, timestamped Authenticode signature of the owner on the PowerShell files and on the manifest, then the SHA-256 of every file; missing, changed or unknown executable files fail. The deploy script runs this check first when <code>PackageIntegrity.psd1</code> is present.</p>
+<!--path--><div class="path"><div class="path-caption"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span>Verify a release</span></div><div class="path-row"><div class="path-node"><span class="path-num">1</span><div><div class="path-title">Extract the ZIP</div><div class="path-sub">in a new folder, files unblocked</div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">2</span><div><div class="path-title">Check the integrity</div><div class="path-sub"><code>.\tools\Test-PackageIntegrity.ps1 -Root .</code></div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">3</span><div><div class="path-title">Check the attestation</div><div class="path-sub">GitHub artifact attestation of the ZIP, against the official repository</div></div></div></div></div><!--/path-->
+<p>A checksum alone does not authenticate a file if the checksum and the file can both be replaced. A valid signature or attestation proves integrity or provenance, not the absence of vulnerabilities. The signing and timestamping of the PowerShell files and of the manifest is done by the owner with their own procedure; <strong>CI never signs and never needs the certificate, secrets, Azure or Exchange</strong>: it builds an unsigned verification package only. A package built that way is a test artifact and is not to be deployed.</p>
+<h3 id="reporting">11.3 Reporting</h3>
+<p>See <code>SECURITY.md</code> to report a vulnerability privately. Never publish credentials, tenant data or sensitive exploit details in a public issue.</p>
+</div></section><section class="section" id="development"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4a5 5 0 0 0-4.6 6.9L3 18.3 5.7 21l7.4-7.4A5 5 0 0 0 20 9l-3 1-3-3 1-3z"/></svg></div><div><div class="section-eyebrow">Chapter 12</div><h2>Development</h2></div></div><div class="section-body">
+<ol class="steps"><li><span class="step-num">1</span><div class="step-body"><div class="step-title">Install</div><div class="step-text"><code>npm ci</code> in the repository.</div></div></li><li><span class="step-num">2</span><div class="step-body"><div class="step-title">Test</div><div class="step-text"><code>npm test</code> (about 300 tests, <code>node --test</code>), then Pester for the deploy script: <code>Invoke-Pester tests/Deploy.Tests.ps1</code>.</div></div></li><li><span class="step-num">3</span><div class="step-body"><div class="step-title">Build</div><div class="step-text"><code>npm run build</code>, <code>npm run validate:env</code>, and <code>npm run validate</code> for the development manifest.</div></div></li><li><span class="step-num">4</span><div class="step-body"><div class="step-title">Change</div><div class="step-text">A short-lived branch, a pull request to <code>main</code>, CI green, merge. Release: a new version, a <code>v</code> tag, a draft release, then the attestation.</div></div></li></ol>
+<h3 id="structure">12.1 Structure</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Path</th><th>Role</th></tr>
+</thead>
+<tbody>
+<tr><td><code>src/shared/config.js</code></td><td>Blocked days, send hour and every localized string (<code>languages.fr</code> / <code>languages.en</code>).</td></tr>
+<tr><td><code>src/shared/rules.js</code></td><td>Pure date logic, no Office dependency. A unit test for every rule change.</td></tr>
+<tr><td><code>src/shared/bypass.js</code></td><td>Header contract and <code>validateJustification</code>, shared by the pane, the handler and the API.</td></tr>
+<tr><td><code>src/launchevent/</code></td><td><code>OnMessageSend</code> / <code>OnAppointmentSend</code> handlers (bundle <code>launchevent.js</code>).</td></tr>
+<tr><td><code>src/taskpane/</code></td><td>The "Schedule send" pane; <code>naa.js</code> is the only importer of <code>@azure/msal-browser</code> and must never reach <code>launchevent.js</code>.</td></tr>
+<tr><td><code>src/commands/commands.html</code></td><td>Page of the browser runtime that loads <code>launchevent.js</code> (in <code>&lt;head&gt;</code>, no <code>defer</code>).</td></tr>
+<tr><td><code>api/</code></td><td>Managed API of the MFA level.</td></tr>
+<tr><td><code>manifest.xml</code></td><td>Development manifest (<code>https://localhost:3000</code>); the production manifest is generated by <code>tools/build-manifest.js</code>.</td></tr>
+<tr><td><code>deploy/</code></td><td>Schema and shipped environments.</td></tr>
+<tr><td><code>tools/</code></td><td>Build, checks, deploy script.</td></tr>
+</tbody>
+</table></div>
+<h3 id="conventions">12.2 Conventions</h3>
+<ul>
+<li>The task pane button id in <code>manifest.xml</code> must equal <code>taskPaneCommandId</code> in <code>config.js</code> (<code>tests/handlers.test.js</code>).</li>
+<li>Smart Alerts limits apply in each language: message 500 characters, <code>cancelLabel</code> 20 characters.</li>
+<li>Tests never assert the values of operator-owned environment files: they use <code>tests/fixtures/environments</code> through <code>NFM_ENVIRONMENTS_DIR</code>. Only <code>example.json</code> (template) is read as-is.</li>
+<li>Never let <code>OnAppointmentSend</code> bypass. The receipt key is an application setting, never a file, a log line or console output.</li>
+<li>Hand-written Fluent 2 CSS with light and dark tokens; <code>npm run icons</code> regenerates the PNG icons from <code>assets/icon*.svg</code>.</li>
+<li>A public-safety test fails if a tenant id, a subscription id, a real host name or a private account name appears in a tracked file.</li>
+</ul>
+<h3 id="documentation">12.3 Documentation</h3>
+<p>The guides are Markdown with a small set of fenced blocks (<code>cards</code>, <code>steps</code>, <code>flow</code>, <code>path</code>); <code>tools/Build-Documentation.js</code> turns them into self-contained HTML pages (<code>docs/*.html</code>), and a test checks that the HTML is up to date. Rebuild after editing a guide: <code>node tools/Build-Documentation.js</code>.</p>
+</div></section><section class="section" id="annex-a-troubleshooting"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="m5.6 5.6 3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/></svg></div><div><div class="section-eyebrow">Annex A</div><h2>Troubleshooting</h2></div></div><div class="section-body">
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Symptom</th><th>Cause and action</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Azure session: none</code></td><td>Run <code>az login</code>.</td></tr>
+<tr><td><code>Subscription ... is not accessible</code></td><td>Wrong account or subscription: <code>az account list</code>, or fix <code>azure.subscriptionId</code>.</td></tr>
+<tr><td><code>The add-in Id of environment ... is a template value</code></td><td>The file holds a placeholder Id. Create the environment with <code>New-NoFridayMailEnvironment.ps1</code>, or put the output of <code>[guid]::NewGuid()</code> in <code>addinId</code>.</td></tr>
+<tr><td><code>addinId ... is already used by ...</code></td><td>Two environments have the same GUID: give a new one (<code>[guid]::NewGuid()</code>) to the one that was never deployed.</td></tr>
+<tr><td><code>Check failed: ... does not contain blockedDays</code></td><td>The served site is not the one of this environment (wrong resource, propagation in progress): run again after a few minutes.</td></tr>
+<tr><td>Outlook does not block</td><td>The manifest is not published (or not yet propagated, up to 24 h), or the user is not in the target; reopen Outlook.</td></tr>
+<tr><td><code>ADDIN_BASE_URL est requise</code></td><td>An environment build needs the site address; the deploy script provides it. By hand: <code>$env:ADDIN_BASE_URL='https://...'</code>.</td></tr>
+<tr><td>The pane says "Your version of Outlook does not allow the exceptional send"</td><td><code>NestedAppAuth 1.1</code> missing: Outlook too old or an unsupported client.</td></tr>
+<tr><td>"The validation of your identity failed" right after the window</td><td>SPA redirect URIs missing or wrong (<code>brk-multihub://...</code>), or the admin consent is missing.</td></tr>
+<tr><td>"Your identity could not be validated (multifactor authentication required)"</td><td>No <code>acrs</code> in the token: authentication context missing, not published, or not targeted by the Conditional Access policy; the API answered 401 twice.</td></tr>
+<tr><td>"The justification service answered with an error (500)"</td><td><code>NFM_RECEIPT_KEY</code> missing or too short (log: <code>NFM_BYPASS_DENIED ... server_misconfigured</code>), or <code>api/config.json</code> missing from the deployment.</td></tr>
+<tr><td>"unreachable"</td><td>The API is not deployed (the post-deployment check expects a 401 without a token), or the network.</td></tr>
+<tr><td>404 on <code>POST /api/bypass</code> after a deployment</td><td>The API was deployed without <code>node_modules</code> (<code>--api-location ./api</code> instead of the package <code>out/api-pkg/&lt;env&gt;</code>), or the site configuration of the repository root was used instead of <code>dist/&lt;env&gt;</code> (<code>--swa-config-location</code> missing).</td></tr>
+<tr><td>401 <code>missing_token</code> in the log with <code>authorizationHeaderIgnored: true</code></td><td>The Entra token was sent in <code>Authorization</code> (overwritten by Static Web Apps) instead of <code>X-NFM-Token</code>.</td></tr>
+<tr><td>401 <code>invalid_token</code> in the log</td><td>Wrong <code>clientId</code> / <code>tenantId</code>, a v1 token (<code>requestedAccessTokenVersion</code> is not 2), scope missing.</td></tr>
+<tr><td>401 <code>insufficient_claims</code></td><td>The token has no authentication context: the MFA was not played back. Check the context and the Conditional Access policy.</td></tr>
+<tr><td><code>Package integrity: ...</code></td><td>A file of the release is missing, changed or unknown, or a signature is not valid. Download the release again; do not edit protected files.</td></tr>
+<tr><td>Manifest rejected when adding it</td><td>The development <code>manifest.xml</code> (points to <code>localhost</code>) or a page saved with Ctrl+S. Use <code>dist/&lt;env&gt;/manifest.prod.xml</code>.</td></tr>
+</tbody>
+</table></div>
+</div></section><section class="section" id="annex-b-the-example-environment-line-by-line"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg></div><div><div class="section-eyebrow">Annex B</div><h2>The example environment, line by line</h2></div></div><div class="section-body">
+<div class="code"><div class="code-head"><span>JSON</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>{
+  &quot;name&quot;: &quot;example&quot;,                      // = the file name, without .json
+  &quot;displayName&quot;: &quot;NoFridayMail (Staging)&quot;, // name shown in Outlook (en-US and en-GB identical)
+  &quot;addinId&quot;: &quot;11111111-2222-4333-8444-555555555555&quot;, // UNIQUE and STABLE GUID: placeholder here, generated once by New-NoFridayMailEnvironment.ps1
+  &quot;version&quot;: &quot;1.0.0.0&quot;,                   // 4 numbers; raise at each manifest change
+  &quot;providerName&quot;: &quot;My Organization&quot;,      // &quot;Provider&quot; shown in the admin center
+  &quot;supportUrl&quot;: &quot;https://example.com/support-nofridaymail&quot;, // support address (HTTPS)
+  &quot;azure&quot;: {
+    &quot;subscriptionId&quot;: &quot;00000000-0000-0000-0000-000000000000&quot;, // optional: targeted Azure subscription
+    &quot;resourceGroup&quot;: &quot;rg-nofridaymail-staging&quot;, // resource group (created if missing)
+    &quot;location&quot;: &quot;westeurope&quot;,             // region of the Static Web App
+    &quot;staticWebAppName&quot;: &quot;swa-nofridaymail-staging&quot;, // name of the Static Web App (unique)
+    &quot;sku&quot;: &quot;Free&quot;                         // Free or Standard
+  },
+  &quot;rules&quot;: {
+    &quot;blockedDays&quot;: [1, 2],                // FORBIDDEN days: here Monday and Tuesday
+    &quot;workingDays&quot;: [1, 2, 3, 4, 5],       // OFFERED days: Monday to Friday (minus blocked days)
+    &quot;sendHour&quot;: 9, &quot;sendMinute&quot;: 30,      // time of the suggestions: 09:30
+    &quot;slotTimes&quot;: [&quot;09:30&quot;, &quot;11:00&quot;, &quot;14:00&quot;, &quot;16:30&quot;], // time chips (8 at most)
+    &quot;dayCount&quot;: 8                         // number of days in the row (1 to 10)
+  },
+  &quot;bypass&quot;: { &quot;enabled&quot;: false },         // optional: justified exceptional send (chapter 9); &quot;mfa&quot;: level 2
+  &quot;defaultLanguage&quot;: &quot;fr&quot;                 // fallback language: fr or en
+}</code></pre></div>
+<p>The real file <code>deploy/environments/example.json</code> has <strong>no</strong> comments (JSON does not accept them): they are here to explain every line. Its <code>description</code> field is a memo. Note that the example blocks Monday and Tuesday, is named "(Staging)" and holds a placeholder <code>addinId</code>: it is a template, never deployed as is (use <code>New-NoFridayMailEnvironment.ps1</code>).</p>
+</div></section><section class="section" id="annex-c-versioning"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8" r="1.5"/></svg></div><div><div class="section-eyebrow">Annex C</div><h2>Versioning</h2></div></div><div class="section-body">
+<p>MAJOR.MINOR.PATCH for the package (<code>package.json</code>, <code>CHANGELOG.md</code>); the manifest version has four numbers (<code>1.1.0.0</code>) and is raised at each manifest change. A release uses a new version and a <code>v</code> tag on a commit already merged into <code>main</code>; a tag is never moved, deleted or reused. <code>CHANGELOG.md</code>, <code>package.json</code> and the manifest <code>Version</code> change together. Every change is listed in <code>CHANGELOG.md</code>.</p></div></section>
+<footer>NoFridayMail 1.1.0 · Nicolas Fabert · updated 2026-10-30 · generated from NoFridayMail-Guide.md</footer></main>
+<button type="button" id="to-top" title="Back to top"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg></button>
+<dialog id="zoom"><img alt=""></dialog>
+<script>
+(() => {
+  "use strict";
+  // Theme toggle (no storage: the choice lasts for the page).
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+  // Highlight the chapter being read in the sidebar.
+  const links = new Map(Array.from(document.querySelectorAll("aside a[data-target]")).map(a => [a.dataset.target, a]));
+  const observer = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      links.forEach(a => a.classList.remove("active"));
+      const link = links.get(e.target.id);
+      if (link) { link.classList.add("active"); link.scrollIntoView({ block: "nearest" }); }
+    }
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  document.querySelectorAll("section.section").forEach(s => observer.observe(s));
+  // Copy buttons.
+  document.querySelectorAll(".code .copy").forEach(button => button.addEventListener("click", async () => {
+    const text = button.closest(".code").querySelector("pre").innerText;
+    try { await navigator.clipboard.writeText(text); }
+    catch { const r = document.createRange(); r.selectNodeContents(button.closest(".code").querySelector("pre")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); s.removeAllRanges(); }
+    const label = button.querySelector("span"); label.textContent = "Copied"; button.classList.add("done");
+    setTimeout(() => { label.textContent = "Copy"; button.classList.remove("done"); }, 1600);
+  }));
+  // Image zoom.
+  const zoom = document.getElementById("zoom");
+  document.querySelectorAll("figure img").forEach(img => img.addEventListener("click", () => { zoom.querySelector("img").src = img.src; zoom.showModal(); }));
+  zoom.addEventListener("click", () => zoom.close());
+  // Back to top.
+  const top = document.getElementById("to-top");
+  addEventListener("scroll", () => top.classList.toggle("visible", scrollY > 600), { passive: true });
+  top.addEventListener("click", () => scrollTo({ top: 0 }));
+})();
+</script>
+</body></html>
