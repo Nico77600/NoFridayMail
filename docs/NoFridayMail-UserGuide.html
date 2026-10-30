@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NoFridayMail - User guide</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("theme");
+    const theme = param === "dark" || param === "light" ? param : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef; --cp-bg-elevated: #fcfbf8; --cp-surface: #ffffff; --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede; --cp-border-strong: #919191; --cp-text: #242424; --cp-text-muted: #5c5c5c; --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b; --cp-accent-hover: #9a1a41; --cp-accent-soft: rgba(177, 31, 75, 0.08); --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a; --cp-danger: #dc2626; --cp-warning: #f59e0b; --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12); --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86); --cp-panel-strong: rgba(255, 255, 255, 0.96); --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a; --cp-bg-elevated: #343231; --cp-surface: #292929; --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747; --cp-border-strong: #5f5f5f; --cp-text: #dedede; --cp-text-muted: #919191; --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1; --cp-accent-hover: #fb7b91; --cp-accent-soft: rgba(253, 142, 161, 0.14); --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80; --cp-danger: #f87171; --cp-warning: #fbbf24; --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32); --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72); --cp-panel-strong: rgba(41, 41, 41, 0.96); --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 15.5px/1.7 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; display: grid; grid-template-columns: 300px minmax(0, 1fr); }
+a { color: var(--cp-link); text-decoration: none; } a:hover { text-decoration: underline; }
+.icon { width: 22px; height: 22px; } .icon-sm { width: 16px; height: 16px; flex-shrink: 0; } .icon-xs { width: 12px; height: 12px; }
+button { font: inherit; color: var(--cp-text); background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 0.625rem; cursor: pointer; }
+button:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 2px; }
+
+/* ---- Sidebar -------------------------------------------------------------------- */
+aside { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--cp-bg-elevated); border-right: 1px solid var(--cp-border); padding: 24px 16px 32px; }
+.brand { display: flex; gap: 12px; align-items: center; padding: 4px 8px 20px; border-bottom: 1px solid var(--cp-border); margin-bottom: 12px; }
+.brand-logo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--cp-accent); color: var(--cp-accent-fg); }
+.brand-name { font-weight: 700; font-size: 15px; line-height: 1.2; } .brand-sub { font-size: 12px; color: var(--cp-text-muted); }
+.nav-part { margin: 20px 8px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cp-accent); }
+.nav-part span { color: var(--cp-text-muted); font-weight: 600; letter-spacing: 0.04em; }
+aside a { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin: 1px 0; border-radius: 0.625rem; color: var(--cp-text); font-size: 13.5px; line-height: 1.35; border-left: 3px solid transparent; }
+aside a:hover { background: var(--cp-accent-soft); text-decoration: none; }
+aside a.active { background: var(--cp-accent-soft); border-left-color: var(--cp-accent); font-weight: 600; }
+.nav-badge { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11.5px; font-weight: 700; background: var(--cp-surface-soft); color: var(--cp-text-muted); border: 1px solid var(--cp-border); }
+aside a.active .nav-badge { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+
+/* ---- Main -------------------------------------------------------------------------- */
+main { padding: 40px 56px 80px; max-width: 1080px; width: 100%; }
+.hero { position: relative; overflow: hidden; border: 1px solid var(--cp-border); border-top: 4px solid var(--cp-accent); border-radius: 16px; padding: 36px 40px 32px; margin-bottom: 40px; background: linear-gradient(125deg, var(--cp-surface) 40%, var(--cp-accent-soft)); }
+.hero::before { content: ""; position: absolute; width: 320px; height: 320px; right: -110px; top: -170px; border: 44px solid var(--cp-highlight); border-radius: 50%; pointer-events: none; }
+.hero-top { position: relative; display: flex; align-items: center; gap: 18px; }
+.hero-logo { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: var(--cp-accent); color: var(--cp-accent-fg); flex-shrink: 0; }
+.hero-logo .icon { width: 32px; height: 32px; }
+.eyebrow, .section-eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cp-accent); }
+.hero h1 { font-size: 38px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.1; margin: 4px 0 0; }
+#theme { margin-left: auto; padding: 8px 10px; display: grid; place-items: center; }
+.badges { position: relative; display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 18px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12.5px; background: var(--cp-surface); border: 1px solid var(--cp-border); color: var(--cp-text-muted); }
+.badge-accent { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); font-weight: 600; }
+.lead { position: relative; font-size: 17.5px; line-height: 1.6; max-width: 760px; margin: 0 0 24px; }
+
+.part { display: flex; align-items: baseline; gap: 14px; margin: 56px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--cp-accent); }
+.part-label { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cp-accent); }
+.part-name { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+
+.section { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 32px 40px 28px; margin: 0 0 28px; box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14); }
+.section-head { display: flex; align-items: center; gap: 16px; padding-bottom: 18px; margin-bottom: 8px; border-bottom: 1px solid var(--cp-border); }
+.section-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); flex-shrink: 0; }
+.section-icon .icon { width: 26px; height: 26px; }
+.section h2 { font-size: 25px; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 0; line-height: 1.2; }
+.section-body > :first-child { margin-top: 16px; }
+h3 { font-size: 17.5px; font-weight: 650; margin: 36px 0 12px; padding-left: 12px; border-left: 3px solid var(--cp-accent); line-height: 1.3; }
+h3.step-h { display: flex; align-items: center; gap: 12px; padding-left: 0; border-left: 0; margin-top: 32px; }
+h3.step-h .path-num { width: 32px; height: 32px; font-size: 14.5px; }
+p { margin: 12px 0; } ul, ol { padding-left: 22px; } li { margin: 6px 0; } li::marker { color: var(--cp-accent); }
+strong { font-weight: 650; }
+code { font-family: Consolas, "Courier New", Courier, monospace; font-size: 0.88em; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); padding: 1px 6px; border-radius: 6px; }
+kbd { font-family: Consolas, monospace; font-size: 0.85em; padding: 1px 7px; border: 1px solid var(--cp-border-strong); border-bottom-width: 2px; border-radius: 6px; background: var(--cp-surface-soft); }
+hr { border: 0; border-top: 1px solid var(--cp-border); margin: 28px 0; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 16px 0 20px; border: 1px solid var(--cp-border); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.55; }
+th { text-align: left; font-weight: 650; font-size: 12.5px; letter-spacing: 0.02em; color: var(--cp-text-muted); background: var(--cp-surface-soft); padding: 11px 16px; border-bottom: 1px solid var(--cp-border); }
+td { padding: 11px 16px; border-bottom: 1px solid var(--cp-border); vertical-align: top; }
+td:first-child { font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--cp-accent-soft); }
+td code { white-space: nowrap; }
+
+/* Code */
+.code { margin: 16px 0 20px; border: 1px solid var(--cp-border); border-radius: 12px; overflow: hidden; background: var(--cp-surface-soft); }
+.code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 6px 16px; border-bottom: 1px solid var(--cp-border); font-size: 12px; font-weight: 600; color: var(--cp-text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.copy { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; font-size: 12px; text-transform: none; letter-spacing: 0; }
+.copy.done { color: var(--cp-success); border-color: var(--cp-success); }
+.code pre { margin: 0; padding: 16px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; }
+.code pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+/* Callouts */
+.markdown-alert { --tone: var(--cp-link); margin: 18px 0; padding: 14px 18px; border: 1px solid color-mix(in srgb, var(--tone) 35%, var(--cp-border)); border-left: 4px solid var(--tone); border-radius: 12px; background: color-mix(in srgb, var(--tone) 7%, var(--cp-surface)); }
+.markdown-alert p { margin: 6px 0; }
+.markdown-alert-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tone); margin: 0 0 4px !important; }
+.markdown-alert-tip { --tone: var(--cp-success); } .markdown-alert-important { --tone: var(--cp-accent); }
+.markdown-alert-warning { --tone: var(--cp-warning); } .markdown-alert-caution { --tone: var(--cp-danger); }
+
+/* Cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 18px 0 22px; position: relative; }
+.card-item { display: flex; gap: 14px; padding: 16px 18px; border: 1px solid var(--cp-border); border-radius: 14px; background: var(--cp-surface); transition: transform 160ms ease, border-color 160ms ease; }
+.card-item:hover { transform: translateY(-2px); border-color: var(--cp-accent); }
+.card-icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); flex-shrink: 0; }
+.card-title { font-weight: 700; font-size: 14.5px; line-height: 1.3; margin: 2px 0 4px; }
+.card-text { font-size: 13.5px; line-height: 1.5; color: var(--cp-text-muted); }
+
+/* Steps */
+.steps { list-style: none; padding: 0; margin: 18px 0 22px; position: relative; }
+.steps li { position: relative; display: flex; gap: 16px; margin: 0; padding: 0 0 18px; }
+.steps li:not(:last-child)::before { content: ""; position: absolute; left: 16px; top: 36px; bottom: 2px; width: 2px; background: var(--cp-border); }
+.step-num { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; background: var(--cp-accent); color: var(--cp-accent-fg); box-shadow: 0 0 0 4px var(--cp-accent-soft); }
+.step-body { padding-top: 5px; } .step-title { font-weight: 700; font-size: 15px; line-height: 1.35; }
+.step-text { color: var(--cp-text-muted); font-size: 14.5px; margin-top: 2px; }
+
+/* Flow */
+.flow { display: flex; align-items: stretch; flex-wrap: wrap; gap: 6px; margin: 20px 0 24px; padding: 20px; border-radius: 14px; background: var(--cp-surface-soft); border: 1px dashed var(--cp-border-strong); }
+.flow-node { flex: 1 1 130px; min-width: 120px; text-align: center; padding: 16px 12px; border-radius: 12px; background: var(--cp-surface); border: 1px solid var(--cp-border); }
+.flow-icon { width: 42px; height: 42px; margin: 0 auto 8px; border-radius: 12px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); }
+.flow-title { font-weight: 700; font-size: 14px; line-height: 1.3; } .flow-text { font-size: 12.5px; color: var(--cp-text-muted); line-height: 1.4; margin-top: 4px; }
+.flow-arrow { flex: 0 0 auto; min-width: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--cp-border-strong); padding: 0 2px; }
+.flow-arrow svg { width: 44px; height: 14px; color: var(--cp-accent); }
+.flow-label { font-size: 12px; font-weight: 700; color: var(--cp-accent); } .flow-sub { font-size: 11px; color: var(--cp-text-muted); text-align: center; max-width: 110px; line-height: 1.3; }
+
+/* Path (guided path: trunk, then branches) */
+.path { margin: 20px 0 26px; padding: 20px 22px 22px; border-radius: 16px; background: var(--cp-surface-soft); border: 1px dashed var(--cp-border-strong); }
+.path-caption { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cp-accent); }
+.path-row { display: flex; align-items: stretch; }
+.path-node { flex: 1 1 0; min-width: 0; display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 12px; background: var(--cp-surface); border: 1px solid var(--cp-border); }
+.path-arrow { flex: 0 0 18px; display: grid; place-items: center; color: var(--cp-accent); }
+.path-arrow svg { width: 10px; height: 34px; }
+.path-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; line-height: 1; background: var(--cp-accent); color: var(--cp-accent-fg); box-shadow: 0 0 0 3px var(--cp-accent-soft); }
+.path-title { font-weight: 700; font-size: 13.5px; line-height: 1.3; padding-top: 3px; }
+.path-sub { font-size: 12.5px; line-height: 1.4; color: var(--cp-text-muted); margin-top: 3px; }
+.path-sub code { font-size: 0.92em; padding: 0 4px; }
+.path-fork { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 16px; color: var(--cp-accent); }
+.path-fork > div { display: grid; place-items: center; height: 34px; }
+.path-fork svg { width: 14px; height: 26px; }
+.path-branches { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 16px; }
+.path-branch { border: 1px solid var(--cp-border); border-top: 3px solid var(--cp-accent); border-radius: 14px; background: var(--cp-surface); padding: 14px 16px 6px; }
+.path-head { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15.5px; margin: 0 0 12px; }
+.path-letter { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-size: 14px; background: var(--cp-text); color: var(--cp-surface); }
+.path-icon { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--cp-accent-soft); color: var(--cp-accent); }
+.path-steps { list-style: none; padding: 0; margin: 0; }
+.path-steps li { position: relative; display: flex; gap: 12px; margin: 0; padding: 0 0 12px; }
+.path-steps li:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 30px; bottom: 0; width: 2px; background: var(--cp-border); }
+@media (max-width: 900px) { .path-row { flex-direction: column; } .path-arrow { transform: rotate(90deg); height: 18px; } .path-branches, .path-fork { grid-auto-flow: row; } }
+
+/* Figures */
+figure { margin: 18px 0 24px; }
+figure img { display: block; max-width: 100%; border: 1px solid var(--cp-border); border-radius: 12px; box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14); cursor: zoom-in; }
+figcaption { font-size: 13px; color: var(--cp-text-muted); margin-top: 8px; text-align: center; }
+dialog#zoom { border: 0; padding: 0; background: transparent; max-width: 96vw; max-height: 96vh; }
+dialog#zoom::backdrop { background: rgba(0, 0, 0, 0.7); }
+dialog#zoom img { max-width: 96vw; max-height: 94vh; border-radius: 12px; cursor: zoom-out; display: block; }
+
+#to-top { position: fixed; right: 24px; bottom: 24px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--cp-accent); color: var(--cp-accent-fg); border: 0; box-shadow: var(--cp-shadow); opacity: 0; pointer-events: none; transition: opacity 200ms; }
+#to-top.visible { opacity: 1; pointer-events: auto; } #to-top:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--cp-border); font-size: 12.5px; color: var(--cp-text-muted); text-align: center; }
+
+/* Long inline code (paths, commands) must wrap inside cards, steps and path nodes instead of overflowing them. */
+.card-item > div, .step-body, .flow-node, .path-node > div, .path-steps li > div { min-width: 0; }
+.card-text code, .step-text code, .path-sub code, .flow-text code, .path-title code { overflow-wrap: anywhere; }
+.path-title, .path-sub, .card-title, .card-text, .step-title, .step-text { overflow-wrap: anywhere; }
+
+@media (max-width: 1000px) {
+  body { display: block; }
+  aside { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--cp-border); }
+  main { padding: 24px 16px 60px; } .section { padding: 24px 20px; } .hero { padding: 28px 22px; }
+}
+@media (max-width: 520px) {
+  code { overflow-wrap: anywhere; } .code pre code { overflow-wrap: normal; }
+  main { padding: 16px 10px 48px; } .hero { padding: 22px 16px 20px; } .section { padding: 20px 14px 18px; border-radius: 14px; }
+  .hero-top { gap: 12px; } .hero-top > div:nth-child(2) { min-width: 0; flex: 1 1 0; }
+  .hero-logo { width: 44px; height: 44px; border-radius: 12px; } .hero-logo .icon { width: 24px; height: 24px; }
+  .hero h1 { font-size: 26px; overflow-wrap: anywhere; } .lead { font-size: 16px; }
+  #theme { align-self: flex-start; flex-shrink: 0; }
+  .section-head { gap: 12px; } .section-icon { width: 40px; height: 40px; } .section h2 { font-size: 21px; overflow-wrap: anywhere; }
+  .part-name { font-size: 22px; } .part { flex-wrap: wrap; gap: 6px 14px; }
+  .code pre { padding: 12px 14px; font-size: 12.5px; } .cards { grid-template-columns: 1fr; }
+  th, td { padding: 9px 12px; } td code { overflow-wrap: normal; }
+  .markdown-alert { padding: 12px 14px; } .flow { padding: 12px; } .path { padding: 14px 12px 14px; }
+  .flow { flex-direction: column; align-items: stretch; gap: 0; } .flow-node { flex: 0 0 auto; }
+  .flow-arrow { min-width: 0; padding: 2px 0; } .flow-arrow svg { transform: rotate(90deg); margin: 15px 0; } .flow-sub { max-width: none; }
+}
+@media print {
+  body { display: block; background: #fff; } aside, #to-top, #theme, .copy { display: none !important; }
+  main { padding: 0; max-width: none; } .section { break-inside: avoid-page; box-shadow: none; } .part { break-before: page; }
+}
+</style></head><body>
+<aside><div class="brand"><div class="brand-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><div class="brand-name">NoFridayMail</div><div class="brand-sub">User guide · v1.1.0</div></div></div>
+<nav aria-label="Contents"><a href="#start-here" data-target="start-here"><span class="nav-badge">1</span><span class="nav-text">Start here</span></a><a href="#before-you-start" data-target="before-you-start"><span class="nav-badge">2</span><span class="nav-text">Before you start</span></a><a href="#set-up-once" data-target="set-up-once"><span class="nav-badge">3</span><span class="nav-text">Set up once</span></a><a href="#a-install-for-one-person-local" data-target="a-install-for-one-person-local"><span class="nav-badge">4</span><span class="nav-text">A · Install for one person (local)</span></a><a href="#b-deploy-for-everyone-centralized" data-target="b-deploy-for-everyone-centralized"><span class="nav-badge">5</span><span class="nav-text">B · Deploy for everyone (centralized)</span></a><a href="#keep-it-running" data-target="keep-it-running"><span class="nav-badge">6</span><span class="nav-text">Keep it running</span></a><a href="#change-the-settings" data-target="change-the-settings"><span class="nav-badge">7</span><span class="nav-text">Change the settings</span></a><a href="#troubleshooting" data-target="troubleshooting"><span class="nav-badge">8</span><span class="nav-text">Troubleshooting</span></a></nav></aside>
+<main><header class="hero" id="top"><div class="hero-top"><div class="hero-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><div class="eyebrow">User guide</div><h1>NoFridayMail</h1></div><button type="button" id="theme" class="ghost" title="Light / dark"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></button></div><div class="badges"><span class="badge badge-accent">Version 1.1.0</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Updated 2026-10-30</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Nicolas Fabert</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg>PowerShell 7.4+</span><span class="badge"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Outlook Smart Alerts</span></div><p class="lead">Follow the path, one step after the other. Each step says <strong>what to do</strong>, gives the command to copy, says <strong>what you should see</strong>, and <strong>what to do if not</strong>. How the add-in works, every setting and the internals are in the <a href="NoFridayMail-Guide.html">technical guide</a>.</p>
+<div class="markdown-alert markdown-alert-important">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2.5h12v8H8.5L5 13.5v-3H2z"/><path d="M8 4.75v2.5M8 8.6v.01"/></svg>Important</p>
+<p>Files downloaded from the Internet may be blocked by Windows and fail to run. Before using this project, unblock every file in the downloaded folder:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>Get-ChildItem &quot;C:\Chemin\Du\Dossier&quot; -Recurse -File -Force | Unblock-File</code></pre></div>
+<p>Replace the example path with the folder where you downloaded or extracted this project.</p>
+</div>
+<div class="markdown-alert markdown-alert-warning">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.75 14.75 13.5H1.25z"/><path d="M8 6.25v3.5M8 11.6v.01"/></svg>Warning</p>
+<p>NoFridayMail is a safeguard against accidental sends, not a security control. It uses the Smart Alerts <code>SoftBlock</code> mode: if Outlook cannot load the add-in, the message is sent. Outlook on Android and iOS is not covered. For a hard guarantee that no mail leaves on a blocked day, add an Exchange Online transport rule (chapter 1).</p>
+</div>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></svg>Note</p>
+<p>The exceptional send (a justification, with an identity check if you turn on the MFA level) is <strong>off</strong> in the delivered configuration. Turn it on only after the server side is in place: <a href="NoFridayMail-Guide.html#exceptional-send">technical guide, chapter 9</a>.</p>
+</div>
+</header><section class="section" id="start-here"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="5" rx="1.5"/><rect x="14" y="15" width="7" height="5" rx="1.5"/><path d="M6.5 9v4a2 2 0 0 0 2 2H14"/></svg></div><div><div class="section-eyebrow">Chapter 1</div><h2>Start here</h2></div></div><div class="section-body">
+<!--path--><div class="path"><div class="path-caption"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Set up once: then the website is online</span></div><div class="path-row"><div class="path-node"><span class="path-num">1</span><div><div class="path-title">Get the tools</div><div class="path-sub">PowerShell 7, Node.js, Azure CLI, then <code>az login</code></div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">2</span><div><div class="path-title">Prepare your environment</div><div class="path-sub">one command creates your file, with its own identity</div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">3</span><div><div class="path-title">Simulate</div><div class="path-sub"><code>-WhatIf</code>: nothing is created, you only read</div></div></div><div class="path-arrow"><svg viewBox="0 0 12 40" aria-hidden="true"><path d="M2 6l6 14-6 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="path-node"><span class="path-num">4</span><div><div class="path-title">Deploy</div><div class="path-sub">the website goes online and the script checks it</div></div></div></div><div class="path-fork"><div><svg viewBox="0 0 14 26" aria-hidden="true"><path d="M7 1v22M2 18l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><svg viewBox="0 0 14 26" aria-hidden="true"><path d="M7 1v22M2 18l5 6 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="path-branches"><div class="path-branch"><div class="path-head"><span class="path-letter">A</span><span class="path-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Install for one person (local)</span></div><ol class="path-steps"><li><span class="path-num">5</span><div><div class="path-title">Open Outlook on the web</div><div class="path-sub"><code>https://aka.ms/olksideload</code></div></div></li><li><span class="path-num">6</span><div><div class="path-title">Add the manifest from a file</div><div class="path-sub">My add-ins › Custom add-ins</div></div></li><li><span class="path-num">7</span><div><div class="path-title">Test</div><div class="path-sub">send a mail on a blocked day</div></div></li></ol></div><div class="path-branch"><div class="path-head"><span class="path-letter">B</span><span class="path-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 5.5 5"/></svg></span><span>Deploy for everyone (centralized)</span></div><ol class="path-steps"><li><span class="path-num">5</span><div><div class="path-title">Upload the manifest</div><div class="path-sub">Microsoft 365 admin center › Integrated apps</div></div></li><li><span class="path-num">6</span><div><div class="path-title">Choose who gets it</div><div class="path-sub">a pilot group first</div></div></li><li><span class="path-num">7</span><div><div class="path-title">Wait and test</div><div class="path-sub">up to 24 hours</div></div></li></ol></div></div></div><!--/path-->
+<ol>
+<li>Do steps <strong>1 to 4</strong> once. They put the small website of the add-in online, in your own Azure subscription.</li>
+<li>Then choose:
+<ul>
+<li><strong>A · Install for one person (local)</strong> — to try the add-in on your own mailbox, with no administrator. Perfect for a test.</li>
+<li><strong>B · Deploy for everyone (centralized)</strong> — a Microsoft 365 administrator publishes the add-in to a group or to the whole company. This is the production way.</li>
+<li>Or both: A first, then B.</li>
+</ul></li>
+</ol>
+<p><strong>What the add-in does.</strong> On a blocked day (Friday by default), when someone clicks <strong>Send</strong>:</p>
+<div class="cards"><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><div><div class="card-title">The message is blocked</div><div class="card-text">A dialog explains why and offers <strong>Schedule send</strong>. Nothing leaves.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><div class="card-title">The schedule pane opens</div><div class="card-text">The person picks another allowed day and time (Monday 08:00 for example) and the message leaves then.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 5.5 5"/></svg></div><div><div class="card-title">Meetings are blocked too</div><div class="card-text">An invitation cannot be delayed: it is blocked with an explanation and can be sent the next allowed day.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/></svg></div><div><div class="card-title">Exceptional send (option)</div><div class="card-text">With a written justification, and an identity check (MFA) if you turn on that level. Exchange decides who is allowed.</div></div></div></div>
+<p><strong>What it does not do.</strong></p>
+<ul>
+<li>Outlook on <strong>Android and iOS</strong> does not run Smart Alerts: the add-in does not cover mobile.</li>
+<li>If Outlook cannot load the add-in, the message is sent (<code>SoftBlock</code>). For a <strong>hard guarantee</strong>, add an Exchange Online <strong>transport rule</strong> that rejects mail on the blocked day. The add-in is the friendly layer, the rule is the strict one.</li>
+<li>Public holidays are not handled: only the day of the week counts.</li>
+</ul>
+<p><strong>Which download to use.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Download</th><th>Where</th><th>What it is</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Release ZIP</strong> <code>NoFridayMail-1.1.0.zip</code> (<strong>recommended</strong>)</td><td>the <em>Releases</em> page of the repository</td><td>The files to deploy and use, with the owner-signed PowerShell files and the integrity manifest <code>PackageIntegrity.psd1</code>. The deploy script verifies them before it runs anything.</td></tr>
+<tr><td><em>Download ZIP</em> of the repository, or <code>git archive</code></td><td>the green <strong>Code</strong> button</td><td><strong>Exactly the same files</strong>, without the signatures and the manifest.</td></tr>
+<tr><td><code>git clone</code> of the repository</td><td>GitHub</td><td>Everything above, plus what only contributors need: the tests (<code>tests/</code>), the CI workflows (<code>.github/</code>), the preview and icon tools.</td></tr>
+</tbody>
+</table></div>
+<p>Inside the ZIP: the deploy script and its tools (<code>tools\</code>), the add-in sources (<code>src\</code>), the small API of the MFA level (<code>api\</code>), the environment schema with an example and a production template (<code>deploy\</code>), the manifest and site files, these guides (Markdown and HTML), <code>README.md</code>, <code>LICENSE</code>, <code>THIRD-PARTY-NOTICES.md</code>, <code>SECURITY.md</code> and <code>CHANGELOG.md</code>. The tests and the CI live <strong>only in the repository</strong>: when <code>tests\</code> is absent, the deploy script says so and skips <code>npm test</code>; the build and the validation still run.</p>
+<p><strong>The commands use one example.</strong> Copy them as they are, and only change the names in this table to yours:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>What</th><th>In the example</th><th>Change to</th></tr>
+</thead>
+<tbody>
+<tr><td>The folder of the add-in</td><td><code>C:\Tools\NoFridayMail</code></td><td>where you extracted the ZIP</td></tr>
+<tr><td>The environment name</td><td><code>contoso</code></td><td>a short name of yours (lowercase letters, digits, dashes)</td></tr>
+<tr><td>The Azure resource group</td><td><code>rg-nofridaymail-contoso</code></td><td>a name of your choice</td></tr>
+<tr><td>The Azure website name</td><td><code>swa-nofridaymail-contoso</code></td><td>a name that nobody else uses in Azure</td></tr>
+<tr><td>The blocked day</td><td><code>[5]</code> (Friday)</td><td>your day: <a href="#change-the-settings">chapter 7</a></td></tr>
+</tbody>
+</table></div>
+</div></section><section class="section" id="before-you-start"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10"/><path d="m3.5 6 1.5 1.5L8 4.5M3.5 12l1.5 1.5L8 10.5M3.5 18l1.5 1.5L8 16.5"/></svg></div><div><div class="section-eyebrow">Chapter 2</div><h2>Before you start</h2></div></div><div class="section-body">
+<ol class="steps"><li><span class="step-num">1</span><div class="step-body"><div class="step-title">Install the tools</div><div class="step-text">PowerShell 7.4 or later, Node.js LTS (22 or later) and the Azure CLI. Three installs, a few minutes.</div></div></li><li><span class="step-num">2</span><div class="step-body"><div class="step-title">Get the add-in</div><div class="step-text">Download the release ZIP, unblock the files (box above) and extract it to <code>C:\Tools\NoFridayMail</code>.</div></div></li><li><span class="step-num">3</span><div class="step-body"><div class="step-title">Check your Azure access</div><div class="step-text">You can sign in to Azure with an account that may create resources (role <em>Contributor</em>) in a subscription.</div></div></li></ol>
+<h3 id="the-details">The details</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Item</th><th>Requirement</th></tr>
+</thead>
+<tbody>
+<tr><td>PowerShell</td><td><strong>7.4 or later</strong> (<code>pwsh</code>). Windows PowerShell 5.1 is not enough.</td></tr>
+<tr><td>Node.js</td><td><strong>22 or later</strong> (LTS), with <code>npm</code>.</td></tr>
+<tr><td>Azure CLI</td><td><code>az</code>, signed in with <code>az login</code>.</td></tr>
+<tr><td>Azure</td><td>A subscription where you can create a resource group and a <em>Static Web App</em> (role <strong>Contributor</strong>). The <code>Microsoft.Web</code> provider must be registered (<code>az provider register --namespace Microsoft.Web</code>). The Free plan is enough.</td></tr>
+<tr><td>Microsoft 365</td><td>To publish for everyone (path B): the <strong>Global Administrator</strong> or <strong>Exchange Administrator</strong> role, in the Microsoft 365 admin center. For path A, nothing.</td></tr>
+<tr><td>Outlook</td><td>Outlook on the web, new Outlook for Windows, classic Outlook for Windows 2206 or later, Outlook for Mac (new interface). Mailbox in Exchange Online.</td></tr>
+</tbody>
+</table></div>
+<p>If a tool is missing, the deploy script tells you in plain words and says what to do (the checklist of step 3). You can also install them now:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>winget install Microsoft.PowerShell
+winget install OpenJS.NodeJS.LTS
+winget install Microsoft.AzureCLI</code></pre></div>
+<p><strong>You should see:</strong> each command ends with <em>Successfully installed</em>. Close the terminal and open a new one, so that the new tools are found.</p>
+<p><strong>If not:</strong> <code>winget</code> is not available on old Windows: use the installers of <a href="https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows" target="_blank" rel="noopener">PowerShell</a>, <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a> and <a href="https://learn.microsoft.com/cli/azure/install-azure-cli" target="_blank" rel="noopener">Azure CLI</a>.</p>
+<h3 id="open-a-terminal-in-the-folder">Open a terminal in the folder</h3>
+<p>In File Explorer, open the folder <code>C:\Tools\NoFridayMail</code>, click the address bar, type <code>pwsh</code> and press Enter. A PowerShell 7 window opens <strong>already in the right folder</strong>. Check:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>$PSVersionTable.PSVersion
+Get-Location</code></pre></div>
+<p><strong>You should see:</strong> a version that starts with 7 (7.4 or more) and the path <code>C:\Tools\NoFridayMail</code>.</p>
+<p><strong>If not:</strong> if <code>pwsh</code> is not recognized, PowerShell 7 is not installed or the terminal was opened before the installation: close it and open a new one.</p>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></svg>Note</p>
+<p>Keep this window open for all the steps. Every command below is run from the folder of the add-in.</p>
+</div>
+</div></section><section class="section" id="set-up-once"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></div><div><div class="section-eyebrow">Chapter 3</div><h2>Set up once</h2></div></div><div class="section-body">
+<h3 id="get-the-tools-ready" class="step-h"><span class="path-num">1</span><span>Get the tools ready</span></h3>
+<p><strong>Do:</strong> sign in to Azure, then choose the subscription where the website will live:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>az login
+az account list --output table
+az account set --subscription &quot;&lt;name or id of your subscription&gt;&quot;</code></pre></div>
+<p><strong>You should see:</strong> a browser window to sign in, then a table of your subscriptions with one marked <code>True</code> in the <em>IsDefault</em> column.</p>
+<p><strong>If not:</strong> <em>az is not recognized</em>: open a new terminal after installing the Azure CLI. <em>No subscription found</em>: your account has no Azure subscription; ask your Azure administrator.</p>
+<p>Then install the add-in's own tools once (this downloads its libraries, about one minute):</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>npm ci</code></pre></div>
+<p><strong>You should see:</strong> a line like <code>added 300 packages</code> and no red <code>npm error</code>.</p>
+<h3 id="prepare-your-environment" class="step-h"><span class="path-num">2</span><span>Prepare your environment</span></h3>
+<p>An <em>environment</em> is one small text file that says everything about one installation: its name, its Azure names, the blocked days. Your files go in <code>deploy\environments.local\</code>, a folder that is yours and never published.</p>
+<div class="markdown-alert markdown-alert-important">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2.5h12v8H8.5L5 13.5v-3H2z"/><path d="M8 4.75v2.5M8 8.6v.01"/></svg>Important</p>
+<p><strong>One environment = one add-in identity.</strong> The file holds an <code>addinId</code>, a long number that Outlook uses to recognise your add-in. It is generated <strong>once</strong>, by the command below, and kept <strong>for good</strong>. With the same number, every new deployment <em>updates</em> the add-in your users already have. With a new number, they would get a <em>second</em> add-in. So: never change it after users installed the add-in, and never copy it into another environment.</p>
+</div>
+<p><strong>Do:</strong> create the file. First read what the command would do, then run it:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>pwsh .\tools\New-NoFridayMailEnvironment.ps1 -Name contoso -WhatIf
+pwsh .\tools\New-NoFridayMailEnvironment.ps1 -Name contoso
+notepad deploy\environments.local\contoso.json</code></pre></div>
+<p><code>-Name</code> is the short name of the environment (lowercase letters, digits, dashes). The command copies the template, generates a fresh <code>addinId</code>, checks that no other environment uses it, validates the file and writes <code>deploy\environments.local\contoso.json</code>. Defaults: Friday blocked, region <code>westeurope</code>, display name <code>NoFridayMail (contoso)</code>, Azure names <code>rg-nofridaymail-contoso</code> and <code>swa-nofridaymail-contoso</code>. Change any of them with <code>-DisplayName</code>, <code>-ResourceGroup</code>, <code>-StaticWebAppName</code>, <code>-Location</code>, <code>-SubscriptionId</code> and <code>-BlockedDays</code> (for example <code>-BlockedDays 1,2</code> blocks Monday and Tuesday; 5 is Friday, the table is in <a href="#change-the-settings">chapter 7</a>).</p>
+<p><strong>You should see:</strong> the three steps <strong>1/3 Checks</strong>, <strong>2/3 Add-in Id and file content</strong>, <strong>3/3 Validation and file</strong>, then a green <em>Environment created</em> card with the path of the file and the new Id, and a <em>Next steps</em> card. With <code>-WhatIf</code> the card says <em>Simulation finished</em> and nothing is written.</p>
+<p>In Notepad, check <code>providerName</code> and <code>supportUrl</code> (shown in the admin center) and leave <code>addinId</code> as it is. Running the command again for the same name stops with <em>already exists</em>: the file, and its Id, are never replaced by accident. <code>-Force</code> rewrites the other values from the template and <strong>keeps the Id</strong>.</p>
+<p>Check the file:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>npm run validate:env</code></pre></div>
+<p><strong>You should see:</strong> <code>Valid environments: contoso, example, prod</code>.</p>
+<p><strong>If not:</strong> the message lists the exact line that is wrong (a missing comma, a name different from the file name, a number that is not a valid identity). Fix it and run the command again.</p>
+<h3 id="simulate" class="step-h"><span class="path-num">3</span><span>Simulate</span></h3>
+<p><strong>Do:</strong> run the script in simulation mode. It <strong>creates nothing, installs nothing, deploys nothing</strong>: it reads and tells.</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>pwsh .\tools\Deploy-NoFridayMail.ps1 -Environment contoso -WhatIf</code></pre></div>
+<p><strong>You should see:</strong> a framed header (<em>NoFridayMail - build and deploy</em>, the target environment, and the mode <em>simulation (-WhatIf): nothing is written</em>), then the six steps — <strong>1/6 Prerequisites</strong>, <strong>2/6 Azure infrastructure</strong>, <strong>3/6 Build and validation</strong>, <strong>4/6 API package</strong> (only with the MFA level), <strong>5/6 Deployment</strong>, <strong>6/6 Post-deployment checks</strong> — and a final box <em>Next steps</em>. Step 1 is a <strong>checklist</strong>:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>   1/6  ?  Prerequisites
+      +  PowerShell 7.6.9 (7.4 or newer required)
+      +  Node.js v22.11.0 (22 or newer required)
+      +  npm 10.9.0
+      +  Environment file valid (schema, consistency, unique Ids)
+      +  Azure CLI (az) found
+      +  Azure session: &lt;your subscription&gt;</code></pre></div>
+<p>A <code>+</code> line is ready. A line marked <code>!</code> or <code>x</code> is a problem, and the line under it, <em>What to do</em>, says how to fix it (install Node.js, run <code>az login</code>, and so on). In simulation, a problem is shown as a warning and the rest is only described, so you can read everything first.</p>
+<p><strong>If not:</strong> the command ends with <code>Environment ... not found</code>: the file is not in <code>deploy\environments.local\</code>, or its name is different. The message lists the environments it can see.</p>
+<h3 id="deploy" class="step-h"><span class="path-num">4</span><span>Deploy</span></h3>
+<p><strong>Do:</strong> when the simulation reads well, run the real thing:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>pwsh .\tools\Deploy-NoFridayMail.ps1 -Environment contoso</code></pre></div>
+<p>The script, in order: checks the prerequisites (and installs the Azure CLI <code>application-insights</code> extension by itself if the MFA level needs it); creates the resource group and the Static Web App if they do not exist (otherwise reuses them); installs the libraries, runs the tests when they are present, builds the site and checks the manifest; uploads the site; then <strong>asks the website itself whether it is alive</strong>. The deployment token is read at the last moment and is never written to a file nor shown.</p>
+<p><strong>You should see:</strong> at the end, under <strong>6/6 Post-deployment checks</strong>, one green line per check, then a summary box and the <em>Next steps</em> box with the path of the manifest. The checks are these:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>   6/6  ?  Post-deployment checks
+      +  HTTP 200  /manifest.prod.xml
+      +  HTTP 200  /launchevent.js
+      +  HTTP 200  /taskpane.html
+      +  HTTP 200  /commands.html
+      +  launchevent.js: blockedDays:[5] present</code></pre></div>
+<p>and the address of your website, <code>https://&lt;name&gt;.azurestaticapps.net</code>. Write it down: it is the address of your add-in.</p>
+<p><strong>If not:</strong> read the red <code>ERROR:</code> line. <em>Prerequisites missing</em>: follow the <em>What to do</em> line. <em>Subscription not accessible</em>: wrong account, <code>az account set</code> again. <em>Check failed ... after several tries</em>: Azure can take a few minutes to publish: run the same command again.</p>
+<h3 id="the-post-deployment-checks-by-hand">The post-deployment checks, by hand</h3>
+<p>The script already checked these. If you want to see them yourself, open the address in a browser:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Address</th><th>You should see</th></tr>
+</thead>
+<tbody>
+<tr><td><code>https://&lt;name&gt;.azurestaticapps.net/</code></td><td>a small page with a link to the manifest</td></tr>
+<tr><td><code>https://&lt;name&gt;.azurestaticapps.net/manifest.prod.xml</code></td><td>XML text starting with <code>&lt;OfficeApp</code> (do not save it from here: see step 5)</td></tr>
+<tr><td><code>https://&lt;name&gt;.azurestaticapps.net/taskpane.html</code></td><td>the schedule pane, without Outlook</td></tr>
+</tbody>
+</table></div>
+<p>The manifest you will install is also on your disk: <code>dist\contoso\manifest.prod.xml</code>.</p>
+<p><strong>Done.</strong> The website is online. Go to <strong>A</strong> (chapter 4), <strong>B</strong> (chapter 5), or both.</p>
+</div></section><section class="section" id="a-install-for-one-person-local"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><div><div class="section-eyebrow">Chapter 4</div><h2>A · Install for one person (local)</h2></div></div><div class="section-body">
+<p>The <em>local</em> mode installs the add-in <strong>on your mailbox only</strong>, from the manifest file. No administrator is needed, and nobody else is affected. It is the way to <strong>test</strong>. (The website is the one you deployed; "local" is about who gets the add-in.)</p>
+<div class="markdown-alert markdown-alert-warning">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.75 14.75 13.5H1.25z"/><path d="M8 6.25v3.5M8 11.6v.01"/></svg>Warning</p>
+<p>Install for one person through <strong>Add from file</strong> (sideloading) or through the centralized deployment of chapter 5. In our tests, a server-side installation for one mailbox with <code>New-App -Mailbox</code> did <strong>not</strong> activate the Smart Alerts in Outlook on the web. Do not use it.</p>
+</div>
+<h3 id="open-the-add-in-store-of-outlook-on-the-web" class="step-h"><span class="path-num">5</span><span>Open the add-in store of Outlook on the web</span></h3>
+<p><strong>Do:</strong> open Outlook on the web, then this address:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>https://aka.ms/olksideload</code></pre></div>
+<p><strong>You should see:</strong> the <em>Add-Ins for Outlook</em> window.</p>
+<p><strong>If not:</strong> a blank window or a sign-in loop: sign in to Outlook on the web first (<code>https://outlook.office.com</code>), then open the address again.</p>
+<h3 id="add-the-manifest-from-a-file" class="step-h"><span class="path-num">6</span><span>Add the manifest from a file</span></h3>
+<p><strong>Do:</strong> in the window, choose <strong>My add-ins</strong>, scroll to <strong>Custom add-ins</strong>, click <strong>+ Add a custom add-in</strong> › <strong>Add from file</strong>, then choose the manifest of your environment:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>C:\Tools\NoFridayMail\dist\contoso\manifest.prod.xml</code></pre></div>
+<p>Accept the warning ("Custom add-ins ... you are responsible for it") and confirm.</p>
+<p><strong>You should see:</strong> <em>NoFridayMail</em> in the list of <strong>Custom add-ins</strong>.</p>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></svg>Note</p>
+<p>The easy way is the file on your disk (above). If you prefer to download the manifest from the website, use <strong>right-click › Save link as</strong> on its link. Do <strong>not</strong> open <code>manifest.prod.xml</code> in the browser and press <strong>Ctrl+S</strong>: the browser then saves the <em>displayed</em> page, not the original file, and Outlook rejects it. This is a real pitfall.</p>
+</div>
+<p><strong>If not:</strong> <em>The manifest is not valid</em>: you picked the development manifest <code>manifest.xml</code> of the folder (it points to <code>localhost</code>) or a page saved with Ctrl+S. Use <code>dist\&lt;environment&gt;\manifest.prod.xml</code>.</p>
+<p><strong>Classic Outlook for Windows:</strong> <em>Get Add-ins</em> (Home ribbon) › <strong>My add-ins</strong> › <strong>Custom add-ins</strong> › <strong>Add a custom add-in</strong> › <strong>Add from file</strong>, then the same file. Close and reopen Outlook.</p>
+<h3 id="test-that-it-works" class="step-h"><span class="path-num">7</span><span>Test that it works</span></h3>
+<p><strong>Do:</strong> you do not have to wait for Friday. In a test environment, block <strong>today</strong>. Find today's number:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>[int](Get-Date).DayOfWeek</code></pre></div>
+<p>(<code>0</code> Sunday, <code>1</code> Monday ... <code>6</code> Saturday.) Put that number in <code>blockedDays</code> of a <em>test</em> environment file (for example <code>[3]</code> on a Wednesday), redeploy it (<a href="#keep-it-running">chapter 6</a>) and install its manifest. Then, in Outlook on the web: <strong>New mail</strong>, write to yourself, click <strong>Send</strong>.</p>
+<p><strong>You should see:</strong> a dialog that says the send is not allowed today, with the buttons <strong>Don't send</strong> and <strong>Schedule send</strong>. <strong>Schedule send</strong> opens the pane with suggestions (the next allowed days), a row of days and time chips. Choosing one and clicking <strong>Schedule and send</strong> sets the delivery time and sends. On an allowed day the mail simply leaves.</p>
+<p><strong>If not:</strong> nothing appears at all. In this order: (1) reload the Outlook page (Ctrl+F5); (2) open <strong>Manage add-ins</strong> and check that <em>NoFridayMail</em> is there and <strong>On</strong>; (3) open <code>https://&lt;name&gt;.azurestaticapps.net/launchevent.js</code> in a browser: it must show code; (4) check that today's number really is in <code>blockedDays</code> of the deployed environment. More in <a href="#troubleshooting">chapter 8</a>.</p>
+<p>Remove the test when you are done: <strong>Manage add-ins</strong> › <em>NoFridayMail</em> › <strong>Remove</strong>.</p>
+</div></section><section class="section" id="b-deploy-for-everyone-centralized"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 5.5 5"/></svg></div><div><div class="section-eyebrow">Chapter 5</div><h2>B · Deploy for everyone (centralized)</h2></div></div><div class="section-body">
+<p>The <em>centralized</em> mode is for production: a Microsoft 365 administrator publishes the add-in once, and Outlook gives it to the chosen people by itself. Smart Alerts only work for add-ins deployed this way (or sideloaded for a test).</p>
+<h3 id="upload-the-manifest" class="step-h"><span class="path-num">5</span><span>Upload the manifest</span></h3>
+<p><strong>Do:</strong> as a Microsoft 365 administrator, open the admin center <code>https://admin.microsoft.com</code>, then <strong>Settings</strong> › <strong>Integrated apps</strong> › <strong>Upload custom apps</strong>. Choose the app type <strong>Office Add-in</strong>, <strong>Upload manifest file (.xml) from device</strong>, and select:</p>
+<div class="code"><div class="code-head"><span>Text</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>C:\Tools\NoFridayMail\dist\contoso\manifest.prod.xml</code></pre></div>
+<p><strong>You should see:</strong> the name <em>NoFridayMail</em>, its version and the permissions it asks for (<strong>ReadWriteItem</strong>: it needs to set the delivery time).</p>
+<p><strong>If not:</strong> <em>The manifest is invalid</em>: the file was changed or saved from the browser; take the one in <code>dist\&lt;environment&gt;\</code>. <em>Not allowed</em>: your role is not Global Administrator or Exchange Administrator.</p>
+<h3 id="choose-who-gets-it" class="step-h"><span class="path-num">6</span><span>Choose who gets it</span></h3>
+<p><strong>Do:</strong> on the next page, choose <strong>Specific users/groups</strong> and pick a <strong>pilot group</strong> of a few people. Keep <strong>Just me</strong> for a very first trial, and <strong>Everyone</strong> for later. Accept the permissions and finish.</p>
+<p><strong>You should see:</strong> <em>Deployment completed</em>, then the add-in in the <strong>Integrated apps</strong> list.</p>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></svg>Note</p>
+<p>Always start with a pilot group. Widen the audience once the pilot has worked for a few days: open the add-in in <strong>Integrated apps</strong> and edit the users.</p>
+</div>
+<h3 id="wait-and-test" class="step-h"><span class="path-num">7</span><span>Wait and test</span></h3>
+<p><strong>Do:</strong> wait. The deployment can take <strong>up to 24 hours</strong> to reach every mailbox; often it is much faster. Ask a pilot person to close and reopen Outlook, then to repeat the test of step 7 above.</p>
+<p><strong>You should see:</strong> the same dialog as in step 7.</p>
+<p><strong>If not:</strong> wait the full 24 hours before worrying. Then follow <a href="#troubleshooting">chapter 8</a>.</p>
+<h3 id="update-remove">Update, remove</h3>
+<ul>
+<li><strong>Update the manifest</strong> (new name, version, address or provider): raise <code>version</code> in the environment file (<code>1.1.0.0</code> becomes <code>1.1.1.0</code>), redeploy, then in <strong>Integrated apps</strong> open the add-in and upload the <strong>new manifest</strong> — the same <code>addinId</code>, a <strong>higher</strong> <code>version</code>. The administrator must accept the new consent. Settings only (blocked days, hours) need <strong>no</strong> new manifest: see chapter 6.</li>
+<li><strong>Remove</strong>: <strong>Integrated apps</strong> › the add-in › <strong>Remove</strong>. Do this <strong>before</strong> deleting the website; otherwise users briefly see "add-in unavailable" (the send still goes, <code>SoftBlock</code>).</li>
+</ul>
+</div></section><section class="section" id="keep-it-running"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/></svg></div><div><div class="section-eyebrow">Chapter 6</div><h2>Keep it running</h2></div></div><div class="section-body">
+<h3 id="change-a-setting-and-redeploy">Change a setting and redeploy</h3>
+<p><strong>Do:</strong> edit your environment file, then run the same command as before:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>pwsh .\tools\Deploy-NoFridayMail.ps1 -Environment contoso -WhatIf
+pwsh .\tools\Deploy-NoFridayMail.ps1 -Environment contoso -SkipInfra</code></pre></div>
+<p><code>-SkipInfra</code> means "the website already exists, only update it" (faster).</p>
+<p><strong>You should see:</strong> the same steps and checks as the first time.</p>
+<p>Users get new <strong>rules</strong> (days, hours) at the next loading of the add-in: a few minutes, sometimes after reopening Outlook. <strong>No new manifest</strong> is needed. A change of <strong>name, version, provider or address</strong> needs a new manifest: chapter 5, <em>Update</em>.</p>
+<h3 id="go-back-to-the-previous-version">Go back to the previous version</h3>
+<p><strong>Do:</strong> extract the ZIP of the previous release in another folder, copy your environment file into its <code>deploy\environments.local\</code>, and deploy from there with <code>-SkipInfra</code>. If the manifest also changed, upload the previous manifest again (chapter 5).</p>
+<h3 id="delete-an-environment">Delete an environment</h3>
+<p>In this order: (1) remove the add-in in <strong>Integrated apps</strong> (or <strong>Manage add-ins</strong> for a sideload); (2) delete the website: <code>az staticwebapp delete --name &lt;swa&gt; --resource-group &lt;rg&gt; --yes</code>; (3) if the resource group holds nothing else: <code>az group delete --name &lt;rg&gt; --yes</code>; (4) delete your environment file.</p>
+<h3 id="verify-a-release-you-downloaded">Verify a release you downloaded</h3>
+<p>The release ZIP carries the owner's signature on its PowerShell files and a manifest of file hashes. The deploy script checks it by itself. To check by hand, from the extracted folder:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>.\tools\Test-PackageIntegrity.ps1 -Root .</code></pre></div>
+<p><strong>You should see:</strong> no output and no error. A red <code>Package integrity: ...</code> line names the file that is missing, changed or unknown: download the release again from the official repository.</p>
+</div></section><section class="section" id="change-the-settings"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><div class="section-eyebrow">Chapter 7</div><h2>Change the settings</h2></div></div><div class="section-body">
+<p>Everything is in your environment file, <code>deploy\environments.local\&lt;name&gt;.json</code>. You change a line, then redeploy (chapter 6). The complete list of settings is in the <a href="NoFridayMail-Guide.html#environments-and-settings">technical guide, chapter 5</a>.</p>
+<p><strong>Days are numbers.</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr><th style="text-align: center;">Number</th><th>Day</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: center;"><strong>0</strong></td><td>Sunday</td></tr>
+<tr><td style="text-align: center;"><strong>1</strong></td><td>Monday</td></tr>
+<tr><td style="text-align: center;"><strong>2</strong></td><td>Tuesday</td></tr>
+<tr><td style="text-align: center;"><strong>3</strong></td><td>Wednesday</td></tr>
+<tr><td style="text-align: center;"><strong>4</strong></td><td>Thursday</td></tr>
+<tr><td style="text-align: center;"><strong>5</strong></td><td>Friday</td></tr>
+<tr><td style="text-align: center;"><strong>6</strong></td><td>Saturday</td></tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead>
+<tr><th>To change</th><th>Write</th><th>Example</th></tr>
+</thead>
+<tbody>
+<tr><td>The blocked day</td><td><code>&quot;blockedDays&quot;: [1]</code></td><td>block Monday instead of Friday</td></tr>
+<tr><td>Two blocked days</td><td><code>&quot;blockedDays&quot;: [1, 5]</code></td><td>Monday and Friday</td></tr>
+<tr><td>The days offered in the pane</td><td><code>&quot;workingDays&quot;: [1, 2, 3, 4, 5]</code></td><td>a day is offered only if it is working <strong>and</strong> not blocked. Weekends are never blocked, only never offered.</td></tr>
+<tr><td>The suggested time</td><td><code>&quot;sendHour&quot;: 8, &quot;sendMinute&quot;: 0</code></td><td>08:00</td></tr>
+<tr><td>The time chips</td><td><code>&quot;slotTimes&quot;: [&quot;09:30&quot;, &quot;14:00&quot;, &quot;16:30&quot;]</code></td><td><code>HH:mm</code>, two digits, 8 at most</td></tr>
+<tr><td>The number of days in the row</td><td><code>&quot;dayCount&quot;: 10</code></td><td>from 1 to 10</td></tr>
+<tr><td>The displayed name</td><td><code>&quot;displayName&quot;: &quot;NoFridayMail&quot;</code></td><td>no <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code> or double quotes. <strong>Needs a new manifest and a higher <code>version</code>.</strong></td></tr>
+</tbody>
+</table></div>
+<div class="markdown-alert markdown-alert-note">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.75v.01"/></svg>Note</p>
+<p><strong>When must the manifest be uploaded again?</strong> Only when the <strong>name, provider, support address, <code>version</code>, website address or <code>addinId</code></strong> change. Changing <code>addinId</code> creates a <em>different</em> add-in: remove the old one. Days, hours and language need only a redeploy of the site (the Description and tooltip texts of the manifest also name the blocked days: upload the new manifest if you want them to match). Never give two environments the same <code>addinId</code>, and never change the <code>addinId</code> of an environment whose add-in is installed.</p>
+</div>
+<h3 id="a-new-environment">A new environment</h3>
+<p>Run <code>pwsh .\tools\New-NoFridayMailEnvironment.ps1 -Name &lt;new name&gt;</code> (step 2 of chapter 3): it creates <code>deploy\environments.local\&lt;new name&gt;.json</code> with its own <code>addinId</code>. Edit <code>displayName</code>, the <code>azure</code> names and the <code>rules</code> if needed. Then <code>npm run validate:env</code>, the simulation, the deployment, and the manifest of <code>dist\&lt;new name&gt;\</code>. Two environments can live in the same Microsoft 365 tenant if their <code>addinId</code> differ — but do not give both to the same people, or the user sees two checks.</p>
+<h3 id="use-another-day-for-example-notuesdayemail">Use another day (for example NoTuesdayEmail)</h3>
+<p>The add-in is not tied to Friday. Everything the user reads (dialog, task pane, suggestions) follows <code>blockedDays</code>, and so do the Description and the button tooltip of the manifest. To block Tuesday under the name <em>NoTuesdayEmail</em>:</p>
+<div class="code"><div class="code-head"><span>PowerShell</span><button type="button" class="copy"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy</span></button></div><pre><code>pwsh .\tools\New-NoFridayMailEnvironment.ps1 -Name notuesday -DisplayName &quot;NoTuesdayEmail&quot; -BlockedDays 2 -WhatIf
+pwsh .\tools\New-NoFridayMailEnvironment.ps1 -Name notuesday -DisplayName &quot;NoTuesdayEmail&quot; -BlockedDays 2
+pwsh .\tools\Deploy-NoFridayMail.ps1 -Environment notuesday -WhatIf</code></pre></div>
+<p><code>-BlockedDays 2</code> is Tuesday (0 = Sunday ... 5 = Friday ... 6 = Saturday); <code>-BlockedDays 1,5</code> blocks Monday and Friday. Then deploy and publish the manifest as usual: it says <em>"Blocks sending emails and meeting invitations on Tuesdays..."</em> (and the French equivalent). The environment has its own <code>addinId</code>, so it can live next to the Friday one in the same tenant (do not give both to the same people).</p>
+<div class="markdown-alert markdown-alert-important">
+<p class="markdown-alert-title"><svg class="icon-sm" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2.5h12v8H8.5L5 13.5v-3H2z"/><path d="M8 4.75v2.5M8 8.6v.01"/></svg>Important</p>
+<p>If you also use an <strong>Exchange transport rule</strong> (the strict layer), set it to the <strong>same day</strong>. The add-in follows the environment file; the rule does not: align them, or the two layers disagree.</p>
+</div>
+<h3 id="the-exceptional-send-option">The exceptional send (option)</h3>
+<p><strong>Like to a 5-year-old.</strong> On a blocked day the add-in is a doorman: "No, not today". With the option, the doorman adds: "If it is really urgent, write <strong>why</strong> on a small paper, and I note it in my book." But the doorman is not the boss: <strong>Exchange</strong> looks at the list of allowed people. Not on the list, refused anyway. And everything is <strong>logged</strong>.</p>
+<p>Two levels:</p>
+<div class="cards"><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/></svg></div><div><div class="card-title">Level 1: the justification</div><div class="card-text">A written reason of at least 20 characters and 3 words. Quick, but it does not prove who wrote it.</div></div></div><div class="card-item"><div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="card-title">Level 2: justification and identity (MFA)</div><div class="card-text">Before sending, the person proves who they are with Microsoft Entra ID, and the add-in gets a numbered ticket (the receipt). Recommended.</div></div></div></div>
+<p>To turn it on, add a <code>bypass</code> block next to <code>rules</code> in the environment file (<code>&quot;bypass&quot;: { &quot;enabled&quot;: true }</code> for level 1, with an <code>mfa</code> block for level 2), validate, redeploy. <strong>Prepare the server side first</strong> (the allowed group, the Exchange transport rule, the Purview trace, and for level 2 the Entra registration): everything is in the <a href="NoFridayMail-Guide.html#exceptional-send">technical guide, chapter 9</a>. With level 2 the script refuses to deploy while <code>tenantId</code> and <code>clientId</code> are the placeholder <code>00000000-0000-0000-0000-000000000000</code>.</p>
+</div></section><section class="section" id="troubleshooting"><div class="section-head"><div class="section-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="m5.6 5.6 3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/></svg></div><div><div class="section-eyebrow">Chapter 8</div><h2>Troubleshooting</h2></div></div><div class="section-body">
+<div class="table-wrap"><table>
+<thead>
+<tr><th>Symptom</th><th>What to do</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Nothing appears</strong> when I click Send on a blocked day</td><td>In this order: reload Outlook on the web (Ctrl+F5); open <strong>Manage add-ins</strong> and check that <em>NoFridayMail</em> is installed and <strong>On</strong>; open <code>https://&lt;name&gt;.azurestaticapps.net/launchevent.js</code> — it must show code; check that today's number is in <code>blockedDays</code>; for a centralized deployment, remember the delay (up to 24 h); classic Outlook: close and reopen it.</td></tr>
+<tr><td>The add-in is installed but only works some days</td><td>That is normal: it only acts on the blocked days of your environment file.</td></tr>
+<tr><td><em>The manifest is not valid</em> when adding it</td><td>You used <code>manifest.xml</code> (development, points to <code>localhost</code>) or a page saved with Ctrl+S. Use <code>dist\&lt;environment&gt;\manifest.prod.xml</code>, or <strong>Save link as</strong>.</td></tr>
+<tr><td>Add-in unavailable, or an error at send</td><td>The website does not answer: open <code>https://&lt;name&gt;.azurestaticapps.net/manifest.prod.xml</code>. If it fails, run the deploy script again. The send still goes (<code>SoftBlock</code>).</td></tr>
+<tr><td>The script says <code>x  Node.js ...</code> or <code>!  ...</code> or <code>Azure session: none</code></td><td>Follow the <em>What to do</em> line: install Node.js 22 or later, or run <code>az login</code>.</td></tr>
+<tr><td><code>Subscription ... is not accessible</code></td><td>Wrong account or subscription: <code>az account list --output table</code>, <code>az account set</code>, or fix <code>azure.subscriptionId</code> in the environment file.</td></tr>
+<tr><td><em>Check failed ... does not answer HTTP 200</em></td><td>Azure is still publishing: wait a few minutes and run the script again.</td></tr>
+<tr><td><em>The add-in Id of environment ... is a template value</em></td><td>The file still holds the placeholder identity of the template. Create the environment with <code>New-NoFridayMailEnvironment.ps1</code> (or paste the output of <code>[guid]::NewGuid()</code> into <code>addinId</code>), then deploy. The deploy script never generates the Id itself, so that it stays the same at every deployment.</td></tr>
+<tr><td><em>invalid: addinId ... is already used by ...</em></td><td>Two environment files have the same identity number. Give a new <code>[guid]::NewGuid()</code> to the one that was never deployed; never change the Id of an add-in users already installed.</td></tr>
+<tr><td>The <strong>MFA window does not open</strong> (exceptional send)</td><td>Your browser blocked the pop-up. Allow pop-ups for <code>https://&lt;name&gt;.azurestaticapps.net</code> and for <code>login.microsoftonline.com</code>, then try again.</td></tr>
+<tr><td>Dialog text ends with <strong>code NFM-B2</strong></td><td>A justification was found but refused: malformed or too weak (too short, fewer than 3 words, too few different letters), or a level-1 header while the MFA is required. Write a clearer justification.</td></tr>
+<tr><td>Dialog text ends with <strong>code NFM-B3</strong></td><td>The receipt is malformed or older than one day. Click <strong>Send with justification</strong> again to get a new one.</td></tr>
+<tr><td><em>Your version of Outlook does not allow the exceptional send</em></td><td>The MFA level needs Nested App Authentication (NestedAppAuth 1.1): use Outlook on the web, new Outlook or a recent Outlook for Windows.</td></tr>
+<tr><td>API <strong>401</strong> <code>missing_token</code>, <code>invalid_token</code>, <code>insufficient_claims</code></td><td>Token problems of the MFA level: see <a href="NoFridayMail-Guide.html#annex-a-troubleshooting">technical guide, Annex A</a>. <code>insufficient_claims</code> means the identity check (MFA) was not played back: check the authentication context and the Conditional Access policy.</td></tr>
+<tr><td>API <strong>404</strong> on <code>/api/bypass</code>, or <strong>500</strong></td><td>The API was not deployed as a self-contained package, or the receipt key is missing: run the deploy script again (it creates the key only if missing).</td></tr>
+</tbody>
+</table></div>
+<p><strong>Where are the requests logged?</strong> Every exceptional send is written at four places (the API log in Application Insights, the Entra sign-in logs, the Exchange message trace and incident report, the Purview DLP alerts). How to find a request, step by step, with the queries: <a href="NoFridayMail-Guide.html#finding-a-request">technical guide, chapter 10</a>.</p>
+<p>Anything else: <a href="NoFridayMail-Guide.html#annex-a-troubleshooting">technical guide, Annex A — Troubleshooting</a>.</p></div></section>
+<footer>NoFridayMail 1.1.0 · Nicolas Fabert · updated 2026-10-30 · generated from NoFridayMail-UserGuide.md</footer></main>
+<button type="button" id="to-top" title="Back to top"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg></button>
+<dialog id="zoom"><img alt=""></dialog>
+<script>
+(() => {
+  "use strict";
+  // Theme toggle (no storage: the choice lasts for the page).
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+  // Highlight the chapter being read in the sidebar.
+  const links = new Map(Array.from(document.querySelectorAll("aside a[data-target]")).map(a => [a.dataset.target, a]));
+  const observer = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      links.forEach(a => a.classList.remove("active"));
+      const link = links.get(e.target.id);
+      if (link) { link.classList.add("active"); link.scrollIntoView({ block: "nearest" }); }
+    }
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  document.querySelectorAll("section.section").forEach(s => observer.observe(s));
+  // Copy buttons.
+  document.querySelectorAll(".code .copy").forEach(button => button.addEventListener("click", async () => {
+    const text = button.closest(".code").querySelector("pre").innerText;
+    try { await navigator.clipboard.writeText(text); }
+    catch { const r = document.createRange(); r.selectNodeContents(button.closest(".code").querySelector("pre")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); s.removeAllRanges(); }
+    const label = button.querySelector("span"); label.textContent = "Copied"; button.classList.add("done");
+    setTimeout(() => { label.textContent = "Copy"; button.classList.remove("done"); }, 1600);
+  }));
+  // Image zoom.
+  const zoom = document.getElementById("zoom");
+  document.querySelectorAll("figure img").forEach(img => img.addEventListener("click", () => { zoom.querySelector("img").src = img.src; zoom.showModal(); }));
+  zoom.addEventListener("click", () => zoom.close());
+  // Back to top.
+  const top = document.getElementById("to-top");
+  addEventListener("scroll", () => top.classList.toggle("visible", scrollY > 600), { passive: true });
+  top.addEventListener("click", () => scrollTo({ top: 0 }));
+})();
+</script>
+</body></html>

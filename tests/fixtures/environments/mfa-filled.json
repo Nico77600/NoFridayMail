@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../deploy/environment.schema.json",
+  "description": "TEST FIXTURE (mfa-filled): does not describe any real environment; tests never read the operator files (deploy/environments.local); only example.json (template) is read from deploy/environments.",
+  "name": "mfa-filled",
+  "displayName": "NoFridayMail",
+  "addinId": "c0a1f001-0000-4000-8000-000000000004",
+  "version": "1.1.0.0",
+  "providerName": "Nicolas Fabert",
+  "supportUrl": "https://github.com/Nico77600/NoFridayMail",
+  "azure": {
+    "subscriptionId": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+    "resourceGroup": "rg-nfm-fixtures",
+    "location": "westeurope",
+    "staticWebAppName": "swa-nfm-fixture-mfa-filled",
+    "sku": "Free"
+  },
+  "rules": {
+    "blockedDays": [
+      5
+    ],
+    "workingDays": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "sendHour": 8,
+    "sendMinute": 0,
+    "slotTimes": [
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "14:00",
+      "16:00"
+    ],
+    "dayCount": 10
+  },
+  "bypass": {
+    "enabled": true,
+    "minLength": 20,
+    "maxLength": 200,
+    "minWords": 3,
+    "minDistinctChars": 6,
+    "mfa": {
+      "required": true,
+      "tenantId": "11111111-2222-4333-8444-555555555555",
+      "clientId": "99999999-2222-4333-8444-555555555555",
+      "authContext": "c1"
+    }
+  },
+  "defaultLanguage": "fr"
+}

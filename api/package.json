@@ -1,0 +1,15 @@
+{
+  "name": "nofridaymail-api",
+  "version": "1.1.0",
+  "private": true,
+  "description": "NoFridayMail managed API for Azure Static Web Apps: exceptional-send receipt (POST /api/bypass).",
+  "main": "src/functions/*.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@azure/functions": "4.17.0",
+    "jose": "5.10.0"
+  }
+}

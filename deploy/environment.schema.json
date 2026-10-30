@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Nico77600/NoFridayMail/deploy/environment.schema.json",
+  "title": "NoFridayMail environment",
+  "description": "Describes a deployment environment (one file per environment in deploy/environments/ or deploy/environments.local/). Strictly validated by tools/env-config.js, which adds the consistency rules (a working day that is not blocked, unique names and add-in Ids...).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "displayName", "addinId", "version", "providerName", "supportUrl", "azure", "rules", "defaultLanguage"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": {
+      "description": "Free-text comment (not used by the build).",
+      "type": "string"
+    },
+    "name": {
+      "description": "Short environment name = file name without .json (lowercase letters, digits, hyphens).",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,30}$"
+    },
+    "protected": {
+      "description": "true: the deploy script refuses this environment without -ConfirmLab.",
+      "type": "boolean"
+    },
+    "displayName": {
+      "description": "Name shown in Outlook and in the admin center, e.g. \"NoFridayMail\" or \"NoFridayMail (Staging)\".",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 125,
+      "pattern": "^[^<>&\"]+$"
+    },
+    "addinId": {
+      "description": "Add-in GUID (manifest Id). UNIQUE per environment, which is what lets several environments coexist in one tenant, and STABLE for the whole life of the environment: the same Id means Outlook updates the same add-in, a new Id installs a second add-in for every user. Generate it once with tools/New-NoFridayMailEnvironment.ps1 (or [guid]::NewGuid()) and never change it after users installed the add-in.",
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "version": {
+      "description": "Four-part manifest version (e.g. 1.1.0.0), at least 1.0.0.0. Increase it with every manifest change.",
+      "type": "string",
+      "pattern": "^[0-9]{1,5}\\.[0-9]{1,5}\\.[0-9]{1,5}\\.[0-9]{1,5}$"
+    },
+    "providerName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 125,
+      "pattern": "^[^<>&\"]+$"
+    },
+    "supportUrl": {
+      "description": "Support URL (HTTPS).",
+      "type": "string",
+      "pattern": "^https://[^\\s\"<>&]+$"
+    },
+    "azure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resourceGroup", "location", "staticWebAppName", "sku"],
+      "properties": {
+        "subscriptionId": {
+          "description": "Azure subscription GUID (optional: otherwise the active az subscription is used).",
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "resourceGroup": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._()-]{1,90}$"
+        },
+        "location": {
+          "description": "Azure region of the Static Web Apps resource, e.g. westeurope.",
+          "type": "string",
+          "pattern": "^[a-z0-9]{3,30}$"
+        },
+        "staticWebAppName": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{1,38}[A-Za-z0-9]$"
+        },
+        "sku": { "enum": ["Free", "Standard"] },
+        "appInsights": {
+          "description": "Name of an Application Insights resource (optional): created if missing and linked to the Static Web App (APPLICATIONINSIGHTS_CONNECTION_STRING setting) so that exceptional-send requests can be found in the traces. Useful with bypass.mfa.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._()-]{0,258}[A-Za-z0-9_()]$"
+        }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blockedDays", "workingDays", "sendHour", "sendMinute", "slotTimes", "dayCount"],
+      "properties": {
+        "blockedDays": {
+          "description": "Days on which sending is forbidden (0 = Sunday ... 5 = Friday ... 6 = Saturday).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+        },
+        "workingDays": {
+          "description": "Working days that are PROPOSED (same numbering). At least one must not be blocked.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+        },
+        "sendHour": { "description": "Hour proposed by the suggestions.", "type": "integer", "minimum": 0, "maximum": 23 },
+        "sendMinute": { "type": "integer", "minimum": 0, "maximum": 59 },
+        "slotTimes": {
+          "description": "Times proposed in the task pane (HH:mm), 8 at most.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" }
+        },
+        "dayCount": { "description": "Number of days shown in the task pane day row.", "type": "integer", "minimum": 1, "maximum": 10 }
+      }
+    },
+    "bypass": {
+      "description": "Justified exceptional send (optional; absent = disabled). When enabled is true, the task pane offers to send despite the block with a justification, carried in the X-NoFriday-Bypass header. Authorization is checked server-side (Exchange transport rule): see docs/NoFridayMail-Guide.md.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "description": "true: enables the exceptional-send section of the task pane and the handling of the header by the OnMessageSend handler.", "type": "boolean" },
+        "minLength": { "description": "Minimum length of the justification after cleaning (characters, default 20).", "type": "integer", "minimum": 5, "maximum": 200 },
+        "maxLength": { "description": "Maximum length of the justification (characters, default 200).", "type": "integer", "minimum": 20, "maximum": 500 },
+        "minWords": { "description": "Minimum number of words of at least 3 letters (default 3; 0 disables the check).", "type": "integer", "minimum": 0, "maximum": 10 },
+        "mfa": {
+          "description": "MFA step (optional): the exceptional send requires an identity verified by Entra ID (authentication context, e.g. c1) and a receipt issued by the site API (POST /api/bypass). When required is true, the task pane no longer offers version 1 of the header and the handler accepts version 2 only. See docs/NoFridayMail-Guide.md.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required"],
+          "properties": {
+            "required": { "type": "boolean" },
+            "tenantId": { "description": "Entra tenant ID (GUID).", "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" },
+            "clientId": { "description": "Application (client) ID of the environment app registration: NAA client and API (scope api://<clientId>/access_as_user).", "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" },
+            "authContext": { "description": "ID of the Entra authentication context protected by the \"MFA every time\" Conditional Access policy (c1 to c99).", "type": "string", "pattern": "^c([1-9]|[1-9][0-9])$" }
+          },
+          "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
+          "then": { "required": ["tenantId", "clientId", "authContext"], "properties": { "tenantId": {}, "clientId": {}, "authContext": {} } }
+        },
+        "minDistinctChars": { "description": "Minimum number of distinct letters, ignoring case (default 6; 0 disables the check). Rejects \"aaaa aaaa aaaa\".", "type": "integer", "minimum": 0, "maximum": 20 }
+      }
+    },
+    "defaultLanguage": {
+      "description": "Fallback language when Outlook does not provide the display language.",
+      "enum": ["fr", "en"]
+    }
+  }
+}

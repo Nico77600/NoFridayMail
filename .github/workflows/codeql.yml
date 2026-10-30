@@ -1,0 +1,89 @@
+{
+  "name": "CodeQL (advisory)",
+  "on": {
+    "pull_request": {
+      "branches": ["main"]
+    },
+    "push": {
+      "branches": ["main"]
+    },
+    "schedule": [
+      {
+        "cron": "17 5 * * 3"
+      }
+    ],
+    "workflow_dispatch": {}
+  },
+  "permissions": {},
+  "concurrency": {
+    "group": "codeql-${{ github.workflow }}-${{ github.ref }}",
+    "cancel-in-progress": true
+  },
+  "jobs": {
+    "analyze": {
+      "name": "CodeQL ${{ matrix.language }} (advisory)",
+      "if": "${{ contains(fromJSON('[\"Nico77600/NoFridayMail\"]'), github.repository) && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main') }}",
+      "runs-on": "ubuntu-latest",
+      "timeout-minutes": 25,
+      "permissions": {
+        "contents": "read",
+        "security-events": "write",
+        "actions": "read"
+      },
+      "strategy": {
+        "fail-fast": false,
+        "max-parallel": 2,
+        "matrix": {
+          "include": [
+            {
+              "language": "actions",
+              "build-mode": "none",
+              "config": {
+                "name": "GitHub Actions workflows",
+                "paths": [".github/workflows"]
+              }
+            },
+            {
+              "language": "javascript-typescript",
+              "build-mode": "none",
+              "config": {
+                "name": "JavaScript and TypeScript sources",
+                "paths": ["src", "api", "tools"]
+              }
+            }
+          ]
+        }
+      },
+      "steps": [
+        {
+          "name": "Check out event revision",
+          "uses": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "with": {
+            "persist-credentials": false
+          }
+        },
+        {
+          "name": "Initialize language-specific analysis",
+          "uses": "github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d",
+          "with": {
+            "languages": "${{ matrix.language }}",
+            "build-mode": "${{ matrix.build-mode }}",
+            "threads": 2,
+            "dependency-caching": "false",
+            "config": "${{ toJson(matrix.config) }}"
+          }
+        },
+        {
+          "name": "Analyze and upload advisory results",
+          "uses": "github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d",
+          "with": {
+            "category": "/language:${{ matrix.language }}",
+            "upload": "always",
+            "upload-database": "false",
+            "wait-for-processing": "true"
+          }
+        }
+      ]
+    }
+  }
+}
