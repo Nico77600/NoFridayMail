@@ -14,6 +14,12 @@ tools/Deploy-NoFridayMail.ps1 -text whitespace=blank-at-eol,space-before-tab,bla
 tools/New-NoFridayMailEnvironment.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 tools/lib/Deploy-Checks.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 tools/Test-PackageIntegrity.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+.github/scripts/Initialize-CIModules.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+.github/scripts/Invoke-CI.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+tests/Deploy.Tests.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+tests/NewEnvironment.Tests.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+tests/PackageIntegrity.Tests.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+tools/New-NoFridayMailPackage.ps1 -text whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 
 # Exact bytes for the documents hashed in the release PackageIntegrity.psd1 manifest.
 docs/**/*.html -text
