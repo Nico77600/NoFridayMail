@@ -1217,7 +1217,7 @@ const challenge = (claims) => ({
 /**
  * Task pane in MFA mode, returned AFTER MSAL initialization (client ready before the click, as in production).
  * `api`: sequence of responses for fetch; `naaScript`: MSAL script; extra: setup options.
- * ctx.warns: console.warn output; ctx.naa.calls: MSAL calls; ctx.fetchCalls: API calls.
+ * ctx.warns: output of any console method; ctx.naa.calls: MSAL calls; ctx.fetchCalls: API calls.
  */
 async function mfaPane(t, naaScript, apiResponses, extra) {
   const order = [];
@@ -1231,12 +1231,17 @@ async function mfaPane(t, naaScript, apiResponses, extra) {
     const next = queue.length > 1 ? queue.shift() : queue[0];
     return typeof next === 'function' ? next() : Promise.resolve(next);
   };
+  // Every console method is captured (not only warn): the pane must stay silent during the MFA flow.
   const warns = [];
-  const originalWarn = console.warn;
-  console.warn = (...args) => warns.push(args.join(' '));
+  const consoleMethods = ['log', 'info', 'debug', 'warn', 'error', 'trace'];
+  const originalConsole = {};
+  consoleMethods.forEach((name) => {
+    originalConsole[name] = console[name];
+    console[name] = (...args) => warns.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '));
+  });
   t.after(() => {
     global.fetch = originalFetch;
-    console.warn = originalWarn;
+    consoleMethods.forEach((name) => { console[name] = originalConsole[name]; });
     naaModule.setFactory(null);
   });
   const ctx = setup(t, NOW, 0, 'normal', Object.assign({ bypass: MFA_BYPASS, internetHeaders: true, naa, sendAsync: () => {} }, extra));
@@ -1249,7 +1254,7 @@ async function mfaPane(t, naaScript, apiResponses, extra) {
 
 const writeMfa = (ctx, text = V2_TEXT) => typeText(ctx, text);
 
-test('mfa: version 1 is never offered (labels, v2 header only); mode diagnostic', async (t) => {
+test('mfa: version 1 is never offered (labels, v2 header only); no console output', async (t) => {
   const ctx = await mfaPane(t);
   assert.equal(ctx.els['bypass-section'].hidden, false);
   assert.equal(ctx.els['bypass-send'].textContent, 'Valider mon identité et envoyer');
@@ -1258,8 +1263,8 @@ test('mfa: version 1 is never offered (labels, v2 header only); mode diagnostic'
   assert.equal(ctx.els['bypass-form'].hidden, false);
   assert.equal(ctx.els['bypass-unsupported'].hidden, true);
   assert.equal(ctx.els['bypass-retry'].hidden, true);
-  // The mode (NAA / browser) is NOT displayed: console.warn trace only.
-  assert.ok(ctx.warns.some((w) => /in NAA \(Nested/.test(w)), 'console.warn : mode NAA');
+  // The mode (NAA / browser) is neither displayed nor logged.
+  assert.deepEqual(ctx.warns, [], 'no console output');
   assert.equal(ctx.els['bypass-diag'], undefined, 'no diagnostic element in the page');
   writeMfa(ctx);
   ctx.click('bypass-send');
@@ -1280,7 +1285,7 @@ test('mfa: without Nested App Authentication 1.1 -> message, "browser" mode, no 
   assert.equal(ctx.els['bypass-unsupported'].hidden, false);
   assert.equal(ctx.els['bypass-form'].hidden, true, 'no field nor button');
   assert.equal(ctx.els['bypass-intro'].hidden, true);
-  assert.ok(ctx.warns.some((w) => /in browser \(NAA unavailable\) mode/.test(w)), 'console.warn : mode navigateur');
+  assert.deepEqual(ctx.warns, [], 'no console output');
   assert.deepEqual(ctx.els['bypass-send'].listeners.click || [], [], 'no handler on the button');
   ctx.click('bypass-send');
   await settle();
@@ -1704,54 +1709,48 @@ test('naa.js: without claims -> silent then window; with claims -> window only; 
   }
 });
 
-test('naa.js: console.warn diagnostic of the MSAL result (type, scopes, alg, aud...) never including the token', async (t) => {
+test('mfa: the pane never logs token claims nor MFA configuration (full flow, every console method)', async (t) => {
   const mfa = MFA_BYPASS.mfa;
-  const warns = [];
-  const originalWarn = console.warn;
-  console.warn = (...a) => warns.push(a.join(' '));
-  t.after(() => { console.warn = originalWarn; naaModule.setFactory(null); });
   const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
-  const header = { alg: 'RS256', typ: 'JWT', nonce: 'abc', kid: 'k1' };
-  const payload = { aud: `api://${mfa.clientId}`, iss: `https://login.microsoftonline.com/${mfa.tenantId}/v2.0`, ver: '2.0', scp: 'access_as_user', acrs: ['c1'], iat: 1793350000, nbf: 1793350000, exp: 1793353600, auth_time: 1793349990, oid: 'SECRET-OID-NOT-LOGGED' };
+  const header = { alg: 'RS256', typ: 'JWT', nonce: 'NONCE-SECRET', kid: 'k1' };
+  const payload = {
+    aud: `api://${mfa.clientId}`,
+    iss: `https://login.microsoftonline.com/${mfa.tenantId}/v2.0`,
+    ver: '2.0',
+    scp: 'access_as_user',
+    acrs: ['c1'],
+    uti: 'UTI-SECRET-VALUE',
+    oid: 'SECRET-OID-NOT-LOGGED',
+    iat: 1793350000,
+    exp: 1793353600
+  };
   const SIGNATURE = 'SIGNATURE-SECRET-VALUE';
   const token = `${b64(header)}.${b64(payload)}.${SIGNATURE}`;
-  const fake = fakeNaa({ popup: () => Promise.resolve({ accessToken: token, tokenType: 'Bearer', scopes: [SCOPE], fromCache: true, expiresOn: new Date(Date.UTC(2026, 9, 30, 11, 0, 0)), account: { environment: 'login.windows.net' } }) });
+  const result = { accessToken: token, tokenType: 'Bearer', scopes: [SCOPE], fromCache: true, expiresOn: new Date(Date.UTC(2026, 9, 30, 11, 0, 0)), account: { environment: 'login.windows.net' } };
+  const tokenResult = () => Promise.resolve(result);
+  const ctx = await mfaPane(
+    t,
+    { silent: tokenResult, popup: tokenResult },
+    [apiResponse(401, { error: 'mfa_required' }, challenge(ACRS_C1)), apiResponse(200, { receipt: RECEIPT_OK, ts: 1 })]
+  );
+  writeMfa(ctx);
+  ctx.click('bypass-send');
+  await settle();
+  assert.ok(ctx.fetchCalls.length >= 1, 'the flow reached the API');
+  // The MSAL wrapper alone, with the same token, is silent as well.
+  const fake = fakeNaa({ popup: tokenResult });
   naaModule.setFactory(fake.factory);
   await naaModule.init(mfa);
   assert.equal(await naaModule.acquireToken(mfa, ACRS_C1), token);
-  const line = warns.find((w) => /MSAL result/.test(w));
-  assert.ok(line, 'diagnostic emitted');
-  const info = JSON.parse(line.slice(line.indexOf('{')));
-  assert.equal(info.tokenType, 'Bearer');
-  assert.deepEqual(info.scopes, [SCOPE]);
-  assert.deepEqual(info.expectedScope, [SCOPE]);
-  assert.equal(info.environment, 'login.windows.net');
-  assert.equal(info.alg, 'RS256');
-  assert.equal(info.typ, 'JWT');
-  assert.equal(info.nonce, true);
-  assert.equal(info.aud, `api://${mfa.clientId}`);
-  assert.equal(info.ver, '2.0');
-  assert.equal(info.parts, 3);
-  assert.equal(info.fromCache, true, 'token served from the cache: visible in the diagnostic');
-  assert.equal(info.expiresOn, '2026-10-30T11:00:00.000Z');
-  assert.deepEqual(info.acrs, ['c1']);
-  assert.equal(info.scp, 'access_as_user');
-  assert.equal(info.iat, 1793350000);
-  assert.equal(info.nbf, 1793350000);
-  assert.equal(info.exp, 1793353600);
-  assert.equal(info.auth_time, 1793349990);
-  const all = warns.join('\n');
-  for (const secret of [token, SIGNATURE, 'SECRET-OID-NOT-LOGGED', b64(payload), b64(header)]) {
-    assert.equal(all.includes(secret), false, 'no token nor segment in the console');
+  const all = ctx.warns.join('\n');
+  assert.equal(all, '', 'nothing is written to the console');
+  const forbidden = [
+    token, SIGNATURE, b64(payload), b64(header), 'NONCE-SECRET', 'UTI-SECRET-VALUE', 'SECRET-OID-NOT-LOGGED',
+    mfa.tenantId, mfa.clientId, mfa.authContext, 'access_as_user', 'acrs', 'aud', 'scp', 'uti', 'login.windows.net'
+  ];
+  for (const value of forbidden) {
+    assert.equal(all.includes(value), false, `console free of "${value}"`);
   }
-  // unexpected result (opaque token, no account): never an exception
-  const opaque = fakeNaa({ popup: () => Promise.resolve({ accessToken: 'opaque', scopes: ['User.Read'] }) });
-  naaModule.setFactory(opaque.factory);
-  await naaModule.init(mfa);
-  assert.equal(await naaModule.acquireToken(mfa, ACRS_C1), 'opaque');
-  const odd = warns.filter((w) => /MSAL result/.test(w)).pop();
-  assert.equal(JSON.parse(odd.slice(odd.indexOf('{'))).parts, 1);
-  assert.equal(odd.includes('opaque"'), false);
 });
 
 // ---------------------------------------------------------------- sessionData: fallback channel of the handler

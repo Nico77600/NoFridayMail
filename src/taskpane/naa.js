@@ -127,56 +127,6 @@ function isCancellation(error) {
   return classify(error) === 'cancelled';
 }
 
-/** Base64url segment of a token decoded into a JSON object, or null. */
-function decodeSegment(segment) {
-  try {
-    var base64 = String(segment).replace(/-/g, '+').replace(/_/g, '/');
-    while (base64.length % 4 !== 0) {
-      base64 += '=';
-    }
-    return JSON.parse(decodeURIComponent(escape(atob(base64))));
-  } catch (e) {
-    return null;
-  }
-}
-
-/**
- * Diagnostic (console.warn) of the MSAL result, WITHOUT token or signature: type, scopes, account, and alg / typ / aud /
- * iss / ver of the decoded (unverified) token. Helps explain a "token refused" on the API side (wrong resource,
- * identity token, unexpected algorithm...).
- */
-function diagnoseResult(result, mfa) {
-  try {
-    var parts = result && typeof result.accessToken === 'string' ? result.accessToken.split('.') : [];
-    var header = parts.length > 0 ? decodeSegment(parts[0]) : null;
-    var claims = parts.length > 1 ? decodeSegment(parts[1]) : null;
-    var info = {
-      tokenType: result && result.tokenType,
-      scopes: result && result.scopes,
-      expectedScope: scopesFor(mfa),
-      fromCache: result ? result.fromCache : undefined,
-      expiresOn: result && result.expiresOn instanceof Date ? result.expiresOn.toISOString() : undefined,
-      environment: result && result.account ? result.account.environment : undefined,
-      parts: parts.length,
-      alg: header ? header.alg : undefined,
-      typ: header ? header.typ : undefined,
-      nonce: header ? Object.prototype.hasOwnProperty.call(header, 'nonce') : undefined,
-      aud: claims ? claims.aud : undefined,
-      iss: claims ? claims.iss : undefined,
-      ver: claims ? claims.ver : undefined,
-      scp: claims ? claims.scp : undefined,
-      acrs: claims ? claims.acrs : undefined,
-      iat: claims ? claims.iat : undefined,
-      nbf: claims ? claims.nbf : undefined,
-      exp: claims ? claims.exp : undefined,
-      auth_time: claims ? claims.auth_time : undefined
-    };
-    console.warn('NoFridayMail: MSAL result (no token) ' + JSON.stringify(info));
-  } catch (e) {
-    // diagnostic only: never blocking
-  }
-}
-
 function accessTokenOf(result) {
   if (!result || typeof result.accessToken !== 'string' || result.accessToken === '') {
     throw new Error('No token in the response.');
@@ -214,7 +164,6 @@ function acquireToken(mfa, claimsJson) {
     pending = Promise.reject(e);
   }
   return Promise.resolve(pending).then(function (result) {
-    diagnoseResult(result, mfa);
     return accessTokenOf(result);
   });
 }

@@ -911,16 +911,6 @@ function toggleBypass() {
   }
 }
 
-/** Authentication mode diagnostic (NAA or browser): console.warn trace only, nothing displayed, no token. */
-function showBypassMode() {
-  var naaMode = naa.mode() === 'naa';
-  try {
-    console.warn('NoFridayMail: Entra authentication in ' + (naaMode ? 'NAA (Nested App Authentication)' : 'browser (NAA unavailable)') + ' mode');
-  } catch (e) {
-    // console unavailable: nothing else to do.
-  }
-}
-
 /** The section exists only for a message being composed with Mailbox 1.8 (internetHeaders) and bypass.enabled. */
 function bypassSupported(item) {
   return !!(
@@ -942,10 +932,6 @@ function initBypass(item) {
   state.bypassMfa = bypass.mfaRequired(cfg.bypass);
   $('bypass-title').textContent = s.tpBypassTitle;
   $('bypass-section').hidden = false;
-  if (state.bypassMfa) {
-    // Diagnostic (no token): MSAL silently falls back to browser mode when NAA is absent.
-    showBypassMode();
-  }
   if (state.bypassMfa && !naa.isSupported()) {
     // Without Nested App Authentication 1.1: message and no button.
     $('bypass-intro').hidden = true;

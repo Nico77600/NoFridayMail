@@ -195,3 +195,25 @@ test('docs generator : Markdown converter essentials (lists, tables, alerts, anc
   assert.equal(generator.anchorToId('annex-a--troubleshooting'), 'annex-a-troubleshooting');
   assert.equal(generator.anchorToId('9-exceptional-send'), 'exceptional-send');
 });
+
+test('docs generator : HTML comments (single-line, multi-line, unterminated) never let markup through', () => {
+  // A complete comment, on one or several lines, is kept as is.
+  assert.equal(generator.markdownToHtml('<!-- icon: key -->\n'), '<!-- icon: key -->');
+  assert.match(generator.markdownToHtml('<!-- first line\nsecond line\n-->\n\nText\n'), /^<!-- first line\nsecond line\n-->\n<p>Text<\/p>/);
+  // An unterminated comment is ordinary text: escaped, and it swallows nothing that follows.
+  const open = generator.markdownToHtml('<!-- <script>alert(1)</script>\n\n## Next\n');
+  assert.doesNotMatch(open, /<script|<!--/);
+  assert.match(open, /&lt;!-- &lt;script&gt;/);
+  assert.match(open, /<h2 id="next">Next<\/h2>/);
+  // Markup after the closing "-->" (same line or after a multi-line comment) is escaped as well.
+  assert.doesNotMatch(generator.markdownToHtml('<!-- a --> <script>x</script>\n'), /<script/);
+  assert.doesNotMatch(generator.markdownToHtml('<!-- a\nb --><script>x</script>\n'), /<script/);
+  assert.doesNotMatch(generator.markdownToHtml('<!-- a --> b --> <script>x</script>\n'), /<script/);
+});
+
+test('docs generator : heading identifiers come from text, markup in a heading cannot survive', () => {
+  const html = generator.markdownToHtml('## Title <scr<b>ipt>alert(1)</scr</b>ipt> end\n\n## **Bold** and `code`\n');
+  assert.doesNotMatch(html, /<script/i);
+  assert.match(html, /<h2 id="bold-and-code"><strong>Bold<\/strong> and <code>code<\/code><\/h2>/);
+  assert.equal(/<h2 id="([^"]*)"/.exec(html)[1].includes('<'), false, 'no angle bracket in an id');
+});

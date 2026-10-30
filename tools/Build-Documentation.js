@@ -94,6 +94,22 @@ const ALERT_TITLES = { note: 'Note', tip: 'Tip', important: 'Important', warning
 const LANGUAGES = { powershell: 'PowerShell', sql: 'SQL', text: 'Text', json: 'JSON', jsonc: 'JSON', csv: 'CSV', kusto: 'Kusto', xml: 'XML', '': 'Code' };
 
 const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+/**
+ * Text content of an HTML fragment produced by inline(): every "<" up to the next ">" belongs to a tag (inline() escapes
+ * literal angle brackets), so a single scan removes the markup. No replacement pass: a replacement can leave a new tag
+ * behind (`<scr<b>ipt>`), a scan cannot.
+ */
+function textOf(html) {
+  let out = '';
+  let inTag = false;
+  for (const ch of String(html)) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>' && inTag) inTag = false;
+    else if (!inTag) out += ch;
+  }
+  return out;
+}
+
 const decode = (t) => String(t).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 
 function icon(name, cls) {
@@ -176,7 +192,9 @@ const RE = {
   bullet: /^( {0,3})([-*+])\s+(.*)$/,
   ordered: /^( {0,3})(\d{1,9})([.)])\s+(.*)$/,
   tableDelimiter: /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?\s*$/,
-  comment: /^\s*<!--.*-->\s*$/,
+  // One complete HTML comment alone on its line (the body never contains "-->", so a second comment or markup cannot follow).
+  comment: /^\s*<!--(?:(?!-->)[\s\S])*-->\s*$/,
+  commentOpen: /^\s*<!--/,
   htmlBlock: /^\s*<\/?(p|div|picture|source|img|details|summary|table|center|a)(\s|>|\/)/i
 };
 
@@ -203,6 +221,19 @@ function splitRow(line) {
   }
   if (cell.trim() !== '' || !s.trimEnd().endsWith('|')) cells.push(cell.trim());
   return cells;
+}
+
+/**
+ * Index of the line that closes the HTML comment opened on line `start` (possibly the same line), or -1 when the comment
+ * is unterminated or has content after its closing "-->".
+ */
+function commentEnd(lines, start) {
+  for (let j = start; j < lines.length; j++) {
+    const text = j === start ? lines[j].replace(RE.commentOpen, '') : lines[j];
+    const close = text.indexOf('-->');
+    if (close >= 0) return text.slice(close + 3).trim() === '' ? j : -1;
+  }
+  return -1;
 }
 
 function startsBlock(line, next) {
@@ -312,7 +343,7 @@ function blocks(lines, ctx, tight) {
     if ((m = RE.heading.exec(line))) {
       const level = m[1].length;
       const inner = inline(m[2]);
-      const plain = decode(inner.replace(/<[^>]+>/g, ''));
+      const plain = decode(textOf(inner));
       let id = pageSlug(plain);
       if (ctx.ids.has(id)) {
         let n = 1;
@@ -324,10 +355,14 @@ function blocks(lines, ctx, tight) {
       i++;
       continue;
     }
-    if (RE.comment.test(line)) {
-      out.push(line.trim());
-      i++;
-      continue;
+    if (RE.commentOpen.test(line)) {
+      const end = commentEnd(lines, i);
+      if (end >= 0) {
+        out.push(lines.slice(i, end + 1).map((l) => l.trim()).join('\n'));
+        i = end + 1;
+        continue;
+      }
+      // Unterminated comment (or markup after "-->"): ordinary text, escaped like any paragraph.
     }
     if (RE.hr.test(line)) {
       out.push('<hr />');
