@@ -324,14 +324,8 @@ function guideBlock(file, kind, first) {
 
 /** Inline SVG of the add-in icon (assets/icon.svg), sized by CSS. */
 function addinIcon() {
-  let svg = fs.readFileSync(path.join(root, 'assets', 'icon.svg'), 'utf8');
-  // Strip comments until stable, then drop any unterminated opener, so no "<!--" can survive.
-  let previous;
-  do {
-    previous = svg;
-    svg = svg.replace(/<!--[\s\S]*?-->/g, '');
-  } while (svg !== previous);
-  svg = svg.replace(/<!--/g, '');
+  // The source comments stay: inside inline SVG they are inert and never rendered.
+  const svg = fs.readFileSync(path.join(root, 'assets', 'icon.svg'), 'utf8');
   return svg.replace(/<svg([^>]*)>/, (m, attrs) => '<svg' + attrs.replace(/\s(width|height)="\d+"/g, '') + ' aria-hidden="true">');
 }
 
