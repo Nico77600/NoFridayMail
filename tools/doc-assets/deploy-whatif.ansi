@@ -1,0 +1,70 @@
+  [38;2;74;158;230m╭──────────────────────────────────────────────────────────────────────────╮[0m
+  [38;2;74;158;230m│[0m[1m  📅  NoFridayMail - build and deploy[0m            [90mv1.1.1 · Nicolas Fabert  [38;2;74;158;230m│[0m
+  [38;2;74;158;230m│[0m[90m     Outlook add-in website on Azure Static Web Apps                      [0m[38;2;74;158;230m│[0m
+  [38;2;74;158;230m╰──────────────────────────────────────────────────────────────────────────╯[0m
+     📁 [90mTarget    [0m contoso
+     ⏩ [90mMode      [0m simulation (-WhatIf): nothing is written
+
+  [48;2;15;108;189m[97m 1/6 [0m 🔎 [1mPrerequisites[0m
+      📁 [0mEnvironment file: C:\Tools\NoFridayMail\deploy\environments.local\contoso.json[0m
+      🔹 [0mAdd-in: NoFridayMail (Contoso) | Id c0a1f001-0000-4000-8000-000000000001 | version 1.0.0.0[0m
+      🔹 [0mBlocked days: 5 | working days: 1,2,3,4,5[0m
+      [90mLegend: ✅ ready   ⚠️ to fix (the line "What to do" says how)   ⏩ not applicable[0m
+      [38;2;80;200;120m✅ [0mPowerShell 7.6.9 (7.4 or newer required)[0m
+      [38;2;80;200;120m✅ [0mNode.js v26.13.0 (22 or newer required)[0m
+      [38;2;80;200;120m✅ [0mnpm 11.20.0[0m
+      [90m⏩ [0m[90mPackage integrity: no PackageIntegrity.psd1 (normal for a clone or "Download ZIP"; the release ZIP has one)[0m
+      [38;2;80;200;120m✅ [0mEnvironment file valid (schema, consistency, unique Ids)[0m
+      [38;2;80;200;120m✅ [0mAzure CLI (az) found[0m
+      [38;2;80;200;120m✅ [0mAzure session: Contoso Production (subscription 00000000-0000-0000-0000-000000000000, tenant 99999999-2222-4333-8444-555555555555)[0m
+      [38;2;80;200;120m✅ [0mSubscription: the one az uses (00000000-0000-0000-0000-000000000000) - no subscriptionId in the environment file[0m
+      [90m⏩ [0m[90mAzure CLI extension "application-insights": not needed for this environment[0m
+
+  [48;2;15;108;189m[97m 2/6 [0m 🌐 [1mAzure infrastructure (rg-nofridaymail-contoso / swa-nofridaymail-contoso)[0m
+      [90m⏩ [0m[90m[simulation] resource group 'rg-nofridaymail-contoso' would be created in westeurope[0m
+      [90m⏩ [0m[90m[simulation] Static Web App 'swa-nofridaymail-contoso' (SKU Free) would be created[0m
+      [90m⏩ [0m[90m[simulation] Assumed address for the next steps: swa-nofridaymail-contoso.azurestaticapps.net[0m
+      🌐 [0mADDIN_BASE_URL = https://swa-nofridaymail-contoso.azurestaticapps.net[0m
+
+  [48;2;15;108;189m[97m 3/6 [0m 🔨 [1mBuild and validation[0m
+      [90m⏩ [0m[90m[simulation] npm ci would install the dependencies[0m
+      [90m⏩ [0m[90m[simulation] npm test would run the unit tests[0m
+      [90m⏩ [0m[90m[simulation] npm run build:prod would build dist/contoso and out/[0m
+      [90m⏩ [0m[90m[simulation] npm run validate:prod would validate the generated manifest[0m
+
+  [48;2;15;108;189m[97m 4/6 [0m 📦 [1mAPI package[0m
+      [90m⏩ [0m[90mNot needed: this environment has no API.[0m
+
+  [48;2;15;108;189m[97m 5/6 [0m 🚀 [1mDeployment of dist/contoso to https://swa-nofridaymail-contoso.azurestaticapps.net[0m
+      🔹 [0mCommand: npx --yes @azure/static-web-apps-cli@2.1.0 deploy ./dist/contoso --env production --swa-config-location ./dist/contoso[0m
+      [90m⏩ [0m[90m[simulation] dist/contoso would be uploaded with the SWA CLI 2.1.0 (the token is read at run time, never displayed)[0m
+
+  [48;2;15;108;189m[97m 6/6 [0m 🧪 [1mPost-deployment checks[0m
+      [90m⏩ [0m[90m[simulation] HTTP 200 would be checked on manifest.prod.xml, launchevent.js, taskpane.html and commands.html, then blockedDays:[5] and the add-in Id in the served files[0m
+
+  [38;2;80;200;120m╭─[1m 🎉  Simulation finished [38;2;80;200;120m[0m[38;2;80;200;120m────────────────────────────────────────────────╮[0m
+    🌐 [90mSite      [0m https://swa-nofridaymail-contoso.azurestaticapps.net
+    📁 [90mManifest  [0m C:\Tools\NoFridayMail\dist\contoso\manifest.prod.xml
+    📦 [90mPackage   [0m C:\Tools\NoFridayMail\out\NoFridayMail-contoso-1.0.0.0.zip
+    ⏩ [90mResult    [0m simulation finished: nothing was created, installed, built or deployed
+  [38;2;80;200;120m╰──────────────────────────────────────────────────────────────────────────╯[0m
+
+
+  [38;2;74;158;230m╭─[1m 📖  Next steps: publish the manifest [38;2;74;158;230m[0m[38;2;74;158;230m───────────────────────────────────╮[0m
+  [38;2;74;158;230m│[0m  Manifest to publish: dist/contoso/manifest.prod.xml (created by the real run)
+  [38;2;74;158;230m│[0m
+  [38;2;74;158;230m│[0m  A. TEST FOR ONE PERSON (local sideload, recommended first)
+  [38;2;74;158;230m│[0m     1. Open Outlook on the web, then go to https://aka.ms/olksideload
+  [38;2;74;158;230m│[0m     2. My add-ins > Custom add-ins > Add a custom add-in > Add from file...
+  [38;2;74;158;230m│[0m     3. Choose the manifest file. Classic Outlook: Get Add-ins > My add-ins >
+  [38;2;74;158;230m│[0m        Add a custom add-in > From file.
+  [38;2;74;158;230m│[0m
+  [38;2;74;158;230m│[0m  B. DEPLOY FOR EVERYONE (centralized deployment)
+  [38;2;74;158;230m│[0m     1. Microsoft 365 admin center > Settings > Integrated apps
+  [38;2;74;158;230m│[0m     2. Upload custom apps > App type: Office Add-in > upload the manifest file
+  [38;2;74;158;230m│[0m     3. Choose the users or groups (start with a pilot group), accept the
+  [38;2;74;158;230m│[0m        permissions (ReadWriteItem) and finish. Propagation: up to 24 hours.
+  [38;2;74;158;230m│[0m     Update: upload the new manifest with the same Id and a higher version.
+  [38;2;74;158;230m│[0m
+  [38;2;74;158;230m│[0m  Step by step, with what you should see: docs/NoFridayMail-UserGuide.md
+  [38;2;74;158;230m╰──────────────────────────────────────────────────────────────────────────╯[0m

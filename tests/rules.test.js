@@ -3,8 +3,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const config = require('../src/shared/config');
-const rules = require('../src/shared/rules');
+const config = require('../package/src/shared/config');
+const rules = require('../package/src/shared/rules');
 
 // Reference week (local dates, hence independent of the test machine's time zone):
 // Monday 26 October 2026 ... Friday 30 ... Saturday 31 ... Sunday 1 November 2026.

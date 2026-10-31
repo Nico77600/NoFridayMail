@@ -1,5 +1,5 @@
 {
-  "runtimeRoot": ".",
+  "runtimeRoot": "package",
   "testMode": "pester",
   "testEntry": null,
   "tests": [

@@ -1,14 +1,14 @@
 ---
 title: NoFridayMail
 subtitle: User guide
-version: 1.1.0
+version: 1.1.1
 author: Nicolas Fabert
 updated: 2026-10-30
 ---
 
 # NoFridayMail — User guide
 
-> Follow the path, one step after the other. Each step says **what to do**, gives the command to copy, says **what you should see**, and **what to do if not**. How the add-in works, every setting and the internals are in the [technical guide](NoFridayMail-Guide.md).
+> Follow the path, one step after the other. Each step says **what to do**, gives the command to copy, says **what you should see**, and **what to do if not**. How the add-in works, every setting and the internals are in the [developer guide](NoFridayMail-Guide.md).
 
 > [!IMPORTANT]
 > Files downloaded from the Internet may be blocked by Windows and fail to run. Before using this project, unblock every file in the downloaded folder:
@@ -23,30 +23,30 @@ updated: 2026-10-30
 > NoFridayMail is a safeguard against accidental sends, not a security control. It uses the Smart Alerts `SoftBlock` mode: if Outlook cannot load the add-in, the message is sent. Outlook on Android and iOS is not covered. For a hard guarantee that no mail leaves on a blocked day, add an Exchange Online transport rule (chapter 1).
 
 > [!NOTE]
-> The exceptional send (a justification, with an identity check if you turn on the MFA level) is **off** in the delivered configuration. Turn it on only after the server side is in place: [technical guide, chapter 9](NoFridayMail-Guide.md#9-exceptional-send).
+> The exceptional send (a justification, with an identity check if you turn on the MFA level) is **off** in the delivered configuration. Turn it on only after the server side is in place: [developer guide, chapter 9](NoFridayMail-Guide.md#9-exceptional-send).
 
 <!-- icon: flow -->
 ## 1. Start here
 
 ```path
 Set up once | settings | Set up once: then the website is online
-Set up once | 1 | Get the tools | PowerShell 7, Node.js, Azure CLI, then `az login`
-Set up once | 2 | Prepare your environment | one command creates your file, with its own identity
+Set up once | 1 | Install the tools | PowerShell 7, Node.js, Azure CLI, then `az login`
+Set up once | 2 | Create your environment | your own file, with a unique add-in Id
 Set up once | 3 | Simulate | `-WhatIf`: nothing is created, you only read
-Set up once | 4 | Deploy | the website goes online and the script checks it
-A | user | Install for one person (local)
-A | 5 | Open Outlook on the web | `https://aka.ms/olksideload`
-A | 6 | Add the manifest from a file | My add-ins › Custom add-ins
-A | 7 | Test | send a mail on a blocked day
+Set up once | 4 | Deploy the site | the website goes online and the script checks it
+A | user | Try it yourself (local)
+A | 5 | Get the manifest | written by step 4, in `dist\<name>`
+A | 6 | Sideload in Outlook | `https://aka.ms/olksideload`, Add from file
+A | 7 | Send a test mail | on a blocked day: the dialog must appear
 B | people | Deploy for everyone (centralized)
-B | 5 | Upload the manifest | Microsoft 365 admin center › Integrated apps
-B | 6 | Choose who gets it | a pilot group first
-B | 7 | Wait and test | up to 24 hours
+B | 5 | Integrated apps | Microsoft 365 admin center: upload the manifest
+B | 6 | Pilot group, then everyone | up to 24 hours to reach every mailbox
+B | 7 | Updates | same Id, higher version
 ```
 
 1. Do steps **1 to 4** once. They put the small website of the add-in online, in your own Azure subscription.
 2. Then choose:
-   - **A · Install for one person (local)** — to try the add-in on your own mailbox, with no administrator. Perfect for a test.
+   - **A · Try it yourself (local)** — to try the add-in on your own mailbox, with no administrator. Perfect for a test.
    - **B · Deploy for everyone (centralized)** — a Microsoft 365 administrator publishes the add-in to a group or to the whole company. This is the production way.
    - Or both: A first, then B.
 
@@ -69,17 +69,17 @@ key | Exceptional send (option) | With a written justification, and an identity 
 
 | Download | Where | What it is |
 |---|---|---|
-| **Release ZIP** `NoFridayMail-1.1.0.zip` (**recommended**) | the *Releases* page of the repository | The files to deploy and use, with the owner-signed PowerShell files and the integrity manifest `PackageIntegrity.psd1`. The deploy script verifies them before it runs anything. |
-| *Download ZIP* of the repository, or `git archive` | the green **Code** button | **Exactly the same files**, without the signatures and the manifest. |
-| `git clone` of the repository | GitHub | Everything above, plus what only contributors need: the tests (`tests/`), the CI workflows (`.github/`), the preview and icon tools. |
+| **Release ZIP** `NoFridayMail-1.1.1.zip` (**recommended**) | the *Releases* page of the repository | The files to deploy and use, with the owner-signed PowerShell files and the integrity manifest `PackageIntegrity.psd1`. The deploy script verifies them before it runs anything. |
+| *Download ZIP* of the repository, or `git archive` | the green **Code** button | **Exactly the same files**, without the signatures and the manifest, in a `package\` folder: work from that folder. |
+| `git clone` of the repository | GitHub | The `package\` folder (the same files), plus what only contributors need at the root: the tests (`tests\`), the CI workflows (`.github\`), the preview, icon and documentation tools. |
 
-Inside the ZIP: the deploy script and its tools (`tools\`), the add-in sources (`src\`), the small API of the MFA level (`api\`), the environment schema with an example and a production template (`deploy\`), the manifest and site files, these guides (Markdown and HTML), `README.md`, `LICENSE`, `THIRD-PARTY-NOTICES.md`, `SECURITY.md` and `CHANGELOG.md`. The tests and the CI live **only in the repository**: when `tests\` is absent, the deploy script says so and skips `npm test`; the build and the validation still run.
+Inside the release ZIP (and in `package\` of the other two): the deploy script and its tools (`tools\`), the add-in sources (`src\`), the small API of the MFA level (`api\`), the environment schema with an example and a production template (`deploy\`), the manifest and site files, these guides (Markdown and HTML, `docs\`), `README.md`, `LICENSE` and `THIRD-PARTY-NOTICES.md`. The tests, the CI and the change log live **only in the repository**: when `tests\` is absent, the deploy script says so and skips `npm test`; the build and the validation still run.
 
 **The commands use one example.** Copy them as they are, and only change the names in this table to yours:
 
 | What | In the example | Change to |
 |---|---|---|
-| The folder of the add-in | `C:\Tools\NoFridayMail` | where you extracted the ZIP |
+| The folder of the add-in | `C:\Tools\NoFridayMail` | where you extracted the release ZIP (the `package\` folder of a *Download ZIP*) |
 | The environment name | `contoso` | a short name of yours (lowercase letters, digits, dashes) |
 | The Azure resource group | `rg-nofridaymail-contoso` | a name of your choice |
 | The Azure website name | `swa-nofridaymail-contoso` | a name that nobody else uses in Azure |
@@ -136,7 +136,7 @@ Get-Location
 <!-- icon: settings -->
 ## 3. Set up once
 
-### 1 · Get the tools ready
+### 1 · Install the tools
 
 **Do:** sign in to Azure, then choose the subscription where the website will live:
 
@@ -158,7 +158,7 @@ npm ci
 
 **You should see:** a line like `added 300 packages` and no red `npm error`.
 
-### 2 · Prepare your environment
+### 2 · Create your environment
 
 An *environment* is one small text file that says everything about one installation: its name, its Azure names, the blocked days. Your files go in `deploy\environments.local\`, a folder that is yours and never published.
 
@@ -213,7 +213,7 @@ A `+` line is ready. A line marked `!` or `x` is a problem, and the line under i
 
 **If not:** the command ends with `Environment ... not found`: the file is not in `deploy\environments.local\`, or its name is different. The message lists the environments it can see.
 
-### 4 · Deploy
+### 4 · Deploy the site
 
 **Do:** when the simulation reads well, run the real thing:
 
@@ -253,14 +253,29 @@ The manifest you will install is also on your disk: `dist\contoso\manifest.prod.
 **Done.** The website is online. Go to **A** (chapter 4), **B** (chapter 5), or both.
 
 <!-- icon: user -->
-## 4. A · Install for one person (local)
+## 4. A · Try it yourself (local)
 
 The *local* mode installs the add-in **on your mailbox only**, from the manifest file. No administrator is needed, and nobody else is affected. It is the way to **test**. (The website is the one you deployed; "local" is about who gets the add-in.)
 
 > [!WARNING]
 > Install for one person through **Add from file** (sideloading) or through the centralized deployment of chapter 5. In our tests, a server-side installation for one mailbox with `New-App -Mailbox` did **not** activate the Smart Alerts in Outlook on the web. Do not use it.
 
-### 5 · Open the add-in store of Outlook on the web
+### 5 · Get the manifest
+
+**Do:** the manifest is the small file that tells Outlook where your website is. Step 4 already wrote it on your disk, there is nothing to download:
+
+```text
+C:\Tools\NoFridayMail\dist\contoso\manifest.prod.xml
+```
+
+**You should see:** the file `manifest.prod.xml` in the folder `dist\contoso` (File Explorer). This is the file you pick in the next step.
+
+> [!NOTE]
+> The easy way is the file on your disk (above). If you prefer to download the manifest from the website, use **right-click › Save link as** on its link. Do **not** open `manifest.prod.xml` in the browser and press **Ctrl+S**: the browser then saves the *displayed* page, not the original file, and Outlook rejects it. This is a real pitfall.
+
+**If not:** the file is missing: step 4 did not finish. Run the deployment again ([chapter 3](#3-set-up-once)).
+
+### 6 · Sideload in Outlook
 
 **Do:** open Outlook on the web, then this address:
 
@@ -268,30 +283,15 @@ The *local* mode installs the add-in **on your mailbox only**, from the manifest
 https://aka.ms/olksideload
 ```
 
-**You should see:** the *Add-Ins for Outlook* window.
-
-**If not:** a blank window or a sign-in loop: sign in to Outlook on the web first (`https://outlook.office.com`), then open the address again.
-
-### 6 · Add the manifest from a file
-
-**Do:** in the window, choose **My add-ins**, scroll to **Custom add-ins**, click **+ Add a custom add-in** › **Add from file**, then choose the manifest of your environment:
-
-```text
-C:\Tools\NoFridayMail\dist\contoso\manifest.prod.xml
-```
-
-Accept the warning ("Custom add-ins ... you are responsible for it") and confirm.
+In the *Add-Ins for Outlook* window, choose **My add-ins**, scroll to **Custom add-ins**, click **+ Add a custom add-in** › **Add from file**, then choose the manifest of step 5. Accept the warning ("Custom add-ins ... you are responsible for it") and confirm.
 
 **You should see:** *NoFridayMail* in the list of **Custom add-ins**.
 
-> [!NOTE]
-> The easy way is the file on your disk (above). If you prefer to download the manifest from the website, use **right-click › Save link as** on its link. Do **not** open `manifest.prod.xml` in the browser and press **Ctrl+S**: the browser then saves the *displayed* page, not the original file, and Outlook rejects it. This is a real pitfall.
-
-**If not:** *The manifest is not valid*: you picked the development manifest `manifest.xml` of the folder (it points to `localhost`) or a page saved with Ctrl+S. Use `dist\<environment>\manifest.prod.xml`.
+**If not:** a blank window or a sign-in loop: sign in to Outlook on the web first (`https://outlook.office.com`), then open the address again. *The manifest is not valid*: you picked the development manifest `manifest.xml` of the folder (it points to `localhost`) or a page saved with Ctrl+S. Use `dist\<environment>\manifest.prod.xml`.
 
 **Classic Outlook for Windows:** *Get Add-ins* (Home ribbon) › **My add-ins** › **Custom add-ins** › **Add a custom add-in** › **Add from file**, then the same file. Close and reopen Outlook.
 
-### 7 · Test that it works
+### 7 · Send a test mail
 
 **Do:** you do not have to wait for Friday. In a test environment, block **today**. Find today's number:
 
@@ -312,7 +312,7 @@ Remove the test when you are done: **Manage add-ins** › *NoFridayMail* › **R
 
 The *centralized* mode is for production: a Microsoft 365 administrator publishes the add-in once, and Outlook gives it to the chosen people by itself. Smart Alerts only work for add-ins deployed this way (or sideloaded for a test).
 
-### 5 · Upload the manifest
+### 5 · Integrated apps
 
 **Do:** as a Microsoft 365 administrator, open the admin center `https://admin.microsoft.com`, then **Settings** › **Integrated apps** › **Upload custom apps**. Choose the app type **Office Add-in**, **Upload manifest file (.xml) from device**, and select:
 
@@ -324,7 +324,7 @@ C:\Tools\NoFridayMail\dist\contoso\manifest.prod.xml
 
 **If not:** *The manifest is invalid*: the file was changed or saved from the browser; take the one in `dist\<environment>\`. *Not allowed*: your role is not Global Administrator or Exchange Administrator.
 
-### 6 · Choose who gets it
+### 6 · Pilot group, then everyone
 
 **Do:** on the next page, choose **Specific users/groups** and pick a **pilot group** of a few people. Keep **Just me** for a very first trial, and **Everyone** for later. Accept the permissions and finish.
 
@@ -333,17 +333,15 @@ C:\Tools\NoFridayMail\dist\contoso\manifest.prod.xml
 > [!NOTE]
 > Always start with a pilot group. Widen the audience once the pilot has worked for a few days: open the add-in in **Integrated apps** and edit the users.
 
-### 7 · Wait and test
-
-**Do:** wait. The deployment can take **up to 24 hours** to reach every mailbox; often it is much faster. Ask a pilot person to close and reopen Outlook, then to repeat the test of step 7 above.
+Then **wait and test**. The deployment can take **up to 24 hours** to reach every mailbox; often it is much faster. Ask a pilot person to close and reopen Outlook, then to repeat the test of step 7 above.
 
 **You should see:** the same dialog as in step 7.
 
 **If not:** wait the full 24 hours before worrying. Then follow [chapter 8](#8-troubleshooting).
 
-### Update, remove
+### 7 · Updates
 
-- **Update the manifest** (new name, version, address or provider): raise `version` in the environment file (`1.1.0.0` becomes `1.1.1.0`), redeploy, then in **Integrated apps** open the add-in and upload the **new manifest** — the same `addinId`, a **higher** `version`. The administrator must accept the new consent. Settings only (blocked days, hours) need **no** new manifest: see chapter 6.
+- **Update the manifest** (new name, version, address or provider): raise `version` in the environment file (`1.1.1.0` becomes `1.1.2.0`), redeploy, then in **Integrated apps** open the add-in and upload the **new manifest** — the same `addinId`, a **higher** `version`. The administrator must accept the new consent. Settings only (blocked days, hours) need **no** new manifest: see chapter 6.
 - **Remove**: **Integrated apps** › the add-in › **Remove**. Do this **before** deleting the website; otherwise users briefly see "add-in unavailable" (the send still goes, `SoftBlock`).
 
 <!-- icon: refresh -->
@@ -385,7 +383,7 @@ The release ZIP carries the owner's signature on its PowerShell files and a mani
 <!-- icon: calendar -->
 ## 7. Change the settings
 
-Everything is in your environment file, `deploy\environments.local\<name>.json`. You change a line, then redeploy (chapter 6). The complete list of settings is in the [technical guide, chapter 5](NoFridayMail-Guide.md#5-environments-and-settings).
+Everything is in your environment file, `deploy\environments.local\<name>.json`. You change a line, then redeploy (chapter 6). The complete list of settings is in the [developer guide, chapter 5](NoFridayMail-Guide.md#5-environments-and-settings).
 
 **Days are numbers.**
 
@@ -442,7 +440,7 @@ key | Level 1: the justification | A written reason of at least 20 characters an
 shield | Level 2: justification and identity (MFA) | Before sending, the person proves who they are with Microsoft Entra ID, and the add-in gets a numbered ticket (the receipt). Recommended.
 ```
 
-To turn it on, add a `bypass` block next to `rules` in the environment file (`"bypass": { "enabled": true }` for level 1, with an `mfa` block for level 2), validate, redeploy. **Prepare the server side first** (the allowed group, the Exchange transport rule, the Purview trace, and for level 2 the Entra registration): everything is in the [technical guide, chapter 9](NoFridayMail-Guide.md#9-exceptional-send). With level 2 the script refuses to deploy while `tenantId` and `clientId` are the placeholder `00000000-0000-0000-0000-000000000000`.
+To turn it on, add a `bypass` block next to `rules` in the environment file (`"bypass": { "enabled": true }` for level 1, with an `mfa` block for level 2), validate, redeploy. **Prepare the server side first** (the allowed group, the Exchange transport rule, the Purview trace, and for level 2 the Entra registration): everything is in the [developer guide, chapter 9](NoFridayMail-Guide.md#9-exceptional-send). With level 2 the script refuses to deploy while `tenantId` and `clientId` are the placeholder `00000000-0000-0000-0000-000000000000`.
 
 <!-- icon: lifebuoy -->
 ## 8. Troubleshooting
@@ -462,9 +460,9 @@ To turn it on, add a `bypass` block next to `rules` in the environment file (`"b
 | Dialog text ends with **code NFM-B2** | A justification was found but refused: malformed or too weak (too short, fewer than 3 words, too few different letters), or a level-1 header while the MFA is required. Write a clearer justification. |
 | Dialog text ends with **code NFM-B3** | The receipt is malformed or older than one day. Click **Send with justification** again to get a new one. |
 | *Your version of Outlook does not allow the exceptional send* | The MFA level needs Nested App Authentication (NestedAppAuth 1.1): use Outlook on the web, new Outlook or a recent Outlook for Windows. |
-| API **401** `missing_token`, `invalid_token`, `insufficient_claims` | Token problems of the MFA level: see [technical guide, Annex A](NoFridayMail-Guide.md#annex-a--troubleshooting). `insufficient_claims` means the identity check (MFA) was not played back: check the authentication context and the Conditional Access policy. |
+| API **401** `missing_token`, `invalid_token`, `insufficient_claims` | Token problems of the MFA level: see [developer guide, Annex A](NoFridayMail-Guide.md#annex-a--troubleshooting). `insufficient_claims` means the identity check (MFA) was not played back: check the authentication context and the Conditional Access policy. |
 | API **404** on `/api/bypass`, or **500** | The API was not deployed as a self-contained package, or the receipt key is missing: run the deploy script again (it creates the key only if missing). |
 
-**Where are the requests logged?** Every exceptional send is written at four places (the API log in Application Insights, the Entra sign-in logs, the Exchange message trace and incident report, the Purview DLP alerts). How to find a request, step by step, with the queries: [technical guide, chapter 10](NoFridayMail-Guide.md#10-finding-a-request).
+**Where are the requests logged?** Every exceptional send is written at four places (the API log in Application Insights, the Entra sign-in logs, the Exchange message trace and incident report, the Purview DLP alerts). How to find a request, step by step, with the queries: [developer guide, chapter 10](NoFridayMail-Guide.md#10-finding-a-request).
 
-Anything else: [technical guide, Annex A — Troubleshooting](NoFridayMail-Guide.md#annex-a--troubleshooting).
+Anything else: [developer guide, Annex A — Troubleshooting](NoFridayMail-Guide.md#annex-a--troubleshooting).

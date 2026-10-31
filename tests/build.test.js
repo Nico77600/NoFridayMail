@@ -10,7 +10,8 @@ const vm = require('node:vm');
 const { spawnSync } = require('node:child_process');
 const AdmZip = require('adm-zip');
 
-const root = path.join(__dirname, '..');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
 const BASE = 'https://example-staging.azurestaticapps.net';
 const dist = path.join(root, 'dist', 'example');
 const zipFile = path.join(root, 'out', 'NoFridayMail-example-1.0.0.0.zip');
@@ -127,7 +128,7 @@ test('BLOCKED_DAYS remains a possible override of an environment build', { timeo
 
 // Builds of fixture environments (tests/fixtures/environments, via NFM_ENVIRONMENTS_DIR): never the operator files
 // (deploy/environments.local). Only example.json (template) is built as is.
-const FIXTURES = path.join(root, 'tests', 'fixtures', 'environments');
+const FIXTURES = path.join(repo, 'tests', 'fixtures', 'environments');
 function buildEnv(name, base, dir) {
   const env = Object.assign({}, process.env, { ADDIN_BASE_URL: base });
   if (dir) env.NFM_ENVIRONMENTS_DIR = dir;

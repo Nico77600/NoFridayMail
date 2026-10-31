@@ -52,8 +52,7 @@ const ALLOWED_GUIDS = new Set([
 // Everything that is published sits under one of these roots; a new top-level entry must be added knowingly.
 const ALLOWED_TOP_LEVEL = new Set([
   '.github', '.gitattributes', '.gitignore', 'AGENTS.md', 'CHANGELOG.md', 'LICENSE', 'PROVENANCE.md', 'README.md',
-  'SECURITY.md', 'THIRD-PARTY-NOTICES.md', 'api', 'assets', 'deploy', 'docs', 'manifest.xml', 'package-lock.json',
-  'package.json', 'src', 'staticwebapp.config.json', 'tests', 'tools', 'webpack.config.js'
+  'SECURITY.md', 'assets', 'package', 'package-lock.json', 'package.json', 'tests', 'tools'
 ]);
 
 const BINARY = /\.(png|jpg|jpeg|gif|ico|zip|pfx|woff2?)$/i;
@@ -99,7 +98,7 @@ test('public safety : no operator environment, secret or certificate file is pub
       /(^|\/)api\/(shared|config\.json|node_modules)/.test(f)
   );
   assert.deepEqual(bad, []);
-  const envs = files.filter((f) => /^deploy\/environments\/[^/]+\.json$/.test(f)).map((f) => path.basename(f, '.json')).sort();
+  const envs = files.filter((f) => /^package\/deploy\/environments\/[^/]+\.json$/.test(f)).map((f) => path.basename(f, '.json')).sort();
   assert.deepEqual(envs, ['example', 'prod'], 'only the template and the production template are published');
 });
 

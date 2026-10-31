@@ -10,14 +10,15 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const envConfig = require('../tools/env-config');
+const envConfig = require('../package/tools/env-config');
 
-const root = path.join(__dirname, '..');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
 const newScript = path.join(root, 'tools', 'New-NoFridayMailEnvironment.ps1');
 const deployScript = path.join(root, 'tools', 'Deploy-NoFridayMail.ps1');
 const newText = fs.readFileSync(newScript, 'utf8');
 const deployText = fs.readFileSync(deployScript, 'utf8');
-const FIXTURES = path.join(root, 'tests', 'fixtures', 'environments');
+const FIXTURES = path.join(repo, 'tests', 'fixtures', 'environments');
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const TEMPLATE_ID = '11111111-2222-4333-8444-555555555555';
 

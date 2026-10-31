@@ -3,10 +3,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { parseBlockedDays, parseWorkingDays, describeBlockedDays } = require('../tools/blocked-days');
-const config = require('../src/shared/config');
-const rules = require('../src/shared/rules');
-const handlers = require('../src/launchevent/handlers');
+const { parseBlockedDays, parseWorkingDays, describeBlockedDays } = require('../package/tools/blocked-days');
+const config = require('../package/src/shared/config');
+const rules = require('../package/src/shared/rules');
+const handlers = require('../package/src/launchevent/handlers');
 
 const at = (month, day, hour = 12, minute = 0) => new Date(2026, month - 1, day, hour, minute, 0, 0);
 

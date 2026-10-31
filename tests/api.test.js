@@ -10,14 +10,15 @@ const path = require('node:path');
 const Module = require('node:module');
 const { generateKeyPair, exportJWK, SignJWT, createLocalJWKSet } = require('jose');
 
-const root = path.join(__dirname, '..');
-const { syncShared } = require('../tools/prepare-api');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
+const { syncShared } = require('../package/tools/prepare-api');
 syncShared(); // api/shared/bypass.js: generated copy of src/shared/bypass.js (git-ignored)
 
-const receiptLib = require('../api/src/lib/receipt');
-const { validateAccessToken } = require('../api/src/lib/token');
-const { handleBypass, bearerToken } = require('../api/src/lib/bypass-handler');
-const bypass = require('../src/shared/bypass');
+const receiptLib = require('../package/api/src/lib/receipt');
+const { validateAccessToken } = require('../package/api/src/lib/token');
+const { handleBypass, bearerToken } = require('../package/api/src/lib/bypass-handler');
+const bypass = require('../package/src/shared/bypass');
 
 const TENANT = '11111111-2222-4333-8444-555555555555';
 const CLIENT = '99999999-2222-4333-8444-555555555555';
@@ -420,8 +421,8 @@ test('api/package.json: v4 model, Node 22, pinned dependencies, folder ready for
   assert.equal(Object.keys(pkg.dependencies).length, 2);
   assert.ok(fs.existsSync(path.join(root, 'api', 'host.json')));
   assert.ok(fs.existsSync(path.join(root, 'api', 'package-lock.json')));
-  const gitignore = fs.readFileSync(path.join(root, '.gitignore'), 'utf8');
-  for (const entry of ['api/shared/', 'api/config.json', 'api/node_modules/']) assert.ok(gitignore.includes(entry), entry);
+  const gitignore = fs.readFileSync(path.join(repo, '.gitignore'), 'utf8');
+  for (const entry of ['package/api/shared/', 'package/api/config.json', 'package/api/node_modules/']) assert.ok(gitignore.includes(entry), entry);
   // The generated copy is identical to the shared source (a single validation rule).
   assert.equal(
     fs.readFileSync(path.join(root, 'api', 'shared', 'bypass.js'), 'utf8'),
@@ -432,7 +433,7 @@ test('api/package.json: v4 model, Node 22, pinned dependencies, folder ready for
 // ------------------------------------------------------------------ verification tool (compliance)
 
 test('verify-receipt: valid v2 header, tampered, version 1, malformed', () => {
-  const { verifyHeader } = require('../tools/verify-receipt');
+  const { verifyHeader } = require('../package/tools/verify-receipt');
   const created = receiptLib.createReceipt({ key: KEY_BYTES, oid: OID, justification: TEXT, nowMs: NOW });
   const header = bypass.buildHeaderValueV2(TEXT, created.receipt);
   const ok = verifyHeader({ key: KEY_BYTES, header, oid: OID });
@@ -449,7 +450,7 @@ test('verify-receipt: valid v2 header, tampered, version 1, malformed', () => {
 });
 
 test('verify-receipt: CLI (exit codes, key only through the environment)', () => {
-  const { main } = require('../tools/verify-receipt');
+  const { main } = require('../package/tools/verify-receipt');
   const created = receiptLib.createReceipt({ key: KEY_BYTES, oid: OID, justification: TEXT, nowMs: NOW });
   const header = bypass.buildHeaderValueV2(TEXT, created.receipt);
   const out = [];
@@ -519,7 +520,7 @@ test('diagnostics: disallowed algorithm (HS256) -> invalid_token ERR_JOSE_ALG_NO
 });
 
 test('diagnostics: encrypted token (5-segment JWE), unreadable or missing -> parts and decoding errors, never the content', async () => {
-  const { diagnose } = require('../api/src/lib/token');
+  const { diagnose } = require('../package/api/src/lib/token');
   const jwe = 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..IV123.CIPHERTEXT-SECRET.TAG123';
   const d = diagnose(jwe);
   assert.equal(d.parts, 5);
@@ -606,7 +607,7 @@ test('Azure function: reads X-NFM-Token (never Authorization for the token); sit
   const text = fs.readFileSync(path.join(root, 'api', 'src', 'functions', 'bypass.js'), 'utf8');
   assert.match(text, /tokenHeader: request\.headers\.get\('x-nfm-token'\)/);
   assert.match(text, /authorization: request\.headers\.get\('authorization'\)/, 'read for diagnostics only');
-  const { withApi } = require('../tools/swa-config');
+  const { withApi } = require('../package/tools/swa-config');
   const swa = withApi(JSON.parse(fs.readFileSync(path.join(root, 'staticwebapp.config.json'), 'utf8')));
   assert.equal(JSON.stringify(swa).toLowerCase().includes('x-nfm-token'), false, 'nothing filters or rewrites X-NFM-Token');
   assert.equal(swa.routes[0].headers.hasOwnProperty('X-NFM-Token'), false);

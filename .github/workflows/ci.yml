@@ -37,11 +37,16 @@ jobs:
           if (-not $node) { throw 'Node.js 22 is not available in the runner tool cache.' }
           Join-Path $node.FullName 'x64' | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 
-      - name: Install dependencies
+      - name: Install the dependencies of the product (package/)
+        shell: pwsh
+        working-directory: package
+        run: npm ci
+
+      - name: Install the development dependencies (repository root)
         shell: pwsh
         run: npm ci
 
-      - name: Unit tests
+      - name: Unit tests (repository root)
         shell: pwsh
         run: npm test
 
@@ -49,11 +54,14 @@ jobs:
         env:
           ADDIN_BASE_URL: https://ci-placeholder.azurestaticapps.net
         shell: pwsh
+        working-directory: package
         run: npm run build
 
       - name: Validate the environment files (schema, consistency, unique ids)
         shell: pwsh
+        working-directory: package
         run: npm run validate:env
+
 
       - name: Load pinned analysis and test modules
         shell: pwsh

@@ -2,7 +2,7 @@
 'use strict';
 
 /*
- * Builds the HTML guides (docs/NoFridayMail-UserGuide.html, docs/NoFridayMail-Guide.html) from their Markdown source.
+ * Builds the HTML guides (package/docs/NoFridayMail-UserGuide.html, package/docs/NoFridayMail-Guide.html) from their Markdown source.
  *
  * The Markdown guides stay readable as plain text (and on GitHub). This script turns each one into a structured,
  * self-contained HTML page (a port of the reference generator tools/Build-Documentation.ps1, with its own small
@@ -37,7 +37,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const docsDir = path.join(__dirname, '..', 'docs');
+const docsDir = path.join(__dirname, '..', 'package', 'docs');
 const GUIDES = ['NoFridayMail-UserGuide', 'NoFridayMail-Guide'];
 
 // ---- Icons (24x24, stroke) ---------------------------------------------------------------------------
@@ -78,7 +78,11 @@ const ICONS = {
   server: '<rect x="4" y="3" width="16" height="7" rx="2"/><rect x="4" y="14" width="16" height="7" rx="2"/><path d="M8 6.5h.01M8 17.5h.01"/>',
   filter: '<path d="M3 5h18l-7 8v6l-4 2v-8z"/>',
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
-  code: '<path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>'
+  code: '<path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+  ban: '<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+  send: '<path d="M21 3 3 10.5l7 3 3 7z"/><path d="m10 13.5 5-5"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><path d="M12 15.5v2"/>',
+  window: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01"/>'
 };
 
 // GitHub alert icons (16x16, stroke).
@@ -856,12 +860,12 @@ function main(argv) {
     if (check) {
       const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : '';
       if (current !== html) {
-        console.error(`Out of date: docs/${name}.html (run: npm run docs)`);
+        console.error(`Out of date: package/docs/${name}.html (run: npm run docs)`);
         stale++;
       }
     } else {
       fs.writeFileSync(target, html, 'utf8');
-      console.log(`Written: docs/${name}.html (${Math.round(Buffer.byteLength(html) / 1024)} KB)`);
+      console.log(`Written: package/docs/${name}.html (${Math.round(Buffer.byteLength(html) / 1024)} KB)`);
     }
   }
   if (check) {
@@ -870,6 +874,6 @@ function main(argv) {
   }
 }
 
-module.exports = { ICONS, GUIDES, buildGuide, markdownToHtml, parseFrontMatter, githubSlug, pageSlug, anchorToId };
+module.exports = { ICONS, GUIDES, CSS, icon, esc, inlineField, customBlock, buildGuide, markdownToHtml, parseFrontMatter, githubSlug, pageSlug, anchorToId };
 
 if (require.main === module) main(process.argv.slice(2));

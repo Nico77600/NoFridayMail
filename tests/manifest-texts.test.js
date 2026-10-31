@@ -7,12 +7,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { renderManifest, manifestTexts } = require('../tools/manifest-lib');
-const config = require('../src/shared/config');
+const { renderManifest, manifestTexts } = require('../package/tools/manifest-lib');
+const config = require('../package/src/shared/config');
 
-const root = path.join(__dirname, '..');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
 const manifestSource = fs.readFileSync(path.join(root, 'manifest.xml'), 'utf8');
-const base = JSON.parse(fs.readFileSync(path.join(root, 'tests', 'fixtures', 'environments', 'base.json'), 'utf8'));
+const base = JSON.parse(fs.readFileSync(path.join(repo, 'tests', 'fixtures', 'environments', 'base.json'), 'utf8'));
 
 const WEEKDAYS = [1, 2, 3, 4, 5];
 const withRules = (blockedDays, workingDays) =>

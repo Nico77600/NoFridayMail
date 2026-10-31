@@ -1,12 +1,12 @@
 ---
 title: NoFridayMail
-subtitle: Technical guide
-version: 1.1.0
+subtitle: Developer guide
+version: 1.1.1
 author: Nicolas Fabert
 updated: 2026-10-30
 ---
 
-# NoFridayMail — Technical guide
+# NoFridayMail — Developer guide
 
 > An Outlook add-in (**Smart Alerts**, event-based activation) that stops e-mails and meeting invitations from leaving on a **blocked day** (Friday by default), offers to schedule the send for the next allowed day, and — as an option — lets an authorized person send anyway with a **written justification** and an **identity check (MFA)**. It is hosted as a small static website on Azure Static Web Apps and published with the Microsoft 365 admin center.
 
@@ -20,7 +20,7 @@ updated: 2026-10-30
 > Replace the example path with the folder where you downloaded or extracted this project.
 
 > [!NOTE]
-> This is the **technical guide**: how the add-in works, every setting of an environment file, how it is built, deployed and verified, the exceptional-send architecture and how to maintain the project. For the step-by-step installation, read the [user guide](NoFridayMail-UserGuide.md).
+> This is the **developer guide**: how the add-in works, every setting of an environment file, how it is built, deployed and verified, the exceptional-send architecture and how to maintain the project. For the step-by-step installation, read the [user guide](NoFridayMail-UserGuide.md).
 
 ```cards
 target | What it answers | "Can this message leave today?" — and, if not, "when can it?".
@@ -33,16 +33,18 @@ file | What it produces | A website folder, a **manifest** to publish, and a ZIP
 
 ```path
 Set up once | settings | Set up once: then the website is online
-Set up once | 1 | Get the tools | PowerShell 7.4, Node.js 22, Azure CLI, `az login`
-Set up once | 2 | Prepare your environment | `New-NoFridayMailEnvironment.ps1 -Name <name>` creates `deploy/environments.local/<name>.json`
-Set up once | 3 | Simulate | `Deploy-NoFridayMail.ps1 -WhatIf`
-Set up once | 4 | Deploy | site online, checks passed
-A | user | Install for one person (local)
-A | 5 | Sideload the manifest | `https://aka.ms/olksideload`, Add from file
-A | 6 | Test | block today in a test environment
+Set up once | 1 | Install the tools | PowerShell 7, Node.js, Azure CLI, then `az login`
+Set up once | 2 | Create your environment | your own file, with a unique add-in Id
+Set up once | 3 | Simulate | `-WhatIf`: nothing is created, you only read
+Set up once | 4 | Deploy the site | the website goes online and the script checks it
+A | user | Try it yourself (local)
+A | 5 | Get the manifest | written by step 4, in `dist\<name>`
+A | 6 | Sideload in Outlook | `https://aka.ms/olksideload`, Add from file
+A | 7 | Send a test mail | on a blocked day: the dialog must appear
 B | people | Deploy for everyone (centralized)
-B | 5 | Upload the manifest | admin center › Integrated apps
-B | 6 | Pilot group | then widen the audience
+B | 5 | Integrated apps | Microsoft 365 admin center: upload the manifest
+B | 6 | Pilot group, then everyone | up to 24 hours to reach every mailbox
+B | 7 | Updates | same Id, higher version
 ```
 
 Every step with its exact command: [user guide, chapters 3 to 5](NoFridayMail-UserGuide.md#1-start-here).
@@ -227,7 +229,7 @@ Running it again for the same name without `-Force` refuses and leaves the file 
 | `protected` | `true` marks an environment in service: the deploy script refuses it without `-ConfirmLab`. |
 | `displayName` | Name shown in Outlook and in the admin center. No `<`, `>`, `&` or double quotes. Part of the manifest. |
 | `addinId` | **GUID unique per environment and stable for its whole life**, generated once by `New-NoFridayMailEnvironment.ps1` (section 5.1.1). Never reuse it, never change it after users installed the add-in. Part of the manifest. |
-| `version` | Four numbers (`1.1.0.0`), each ≤ 65535, at least `1.0.0.0`. Raise it at each manifest change. |
+| `version` | Four numbers (`1.1.1.0`), each ≤ 65535, at least `1.0.0.0`. Raise it at each manifest change. |
 | `providerName`, `supportUrl` | Provider and support address (HTTPS) shown in the admin center. |
 | `azure.subscriptionId` | Optional. Targets a subscription; otherwise the one of `az login`. |
 | `azure.resourceGroup`, `azure.location`, `azure.staticWebAppName`, `azure.sku` | The resource group (created if missing), the region, the Static Web App (unique in Azure, 2 to 40 letters, digits, dashes) and the plan (`Free` or `Standard`). |
@@ -333,10 +335,9 @@ Publishing is manual on purpose: it needs an administrator and a consent. The ma
 | Validate the environment files | `npm run validate:env` |
 | Build only | `$env:ADDIN_BASE_URL='https://<site>'; npm run build:prod -- --env <name>` |
 | Validate the generated manifest | `npm run validate:prod -- --env <name>` |
-| See the pane without Outlook | `npm run preview` |
 | Read the help of the script | `Get-Help .\tools\Deploy-NoFridayMail.ps1 -Full` |
 
-`npm run preview` builds the pane and writes `dist/preview.html` (the real pane with a fake Office object, driven by the query, for example `?theme=dark&lang=en&state=sending`), `dist/preview-gallery.html` and `previews/taskpane-preview.html` (a standalone file showing light and dark, French and English). These files are never referenced by the manifest and never produced by `build` or `build:prod`: do not deploy them. The Smart Alerts dialog is drawn by Outlook and is not customizable.
+Run these commands in the folder of the add-in (the extracted release ZIP, or `package/` in a clone). To see the pane without Outlook, a contributor runs `npm run preview` at the **root of a clone** of the repository (the preview tool is not in the download): it builds the pane and writes `package/dist/preview.html` (the real pane with a fake Office object, driven by the query, for example `?theme=dark&lang=en&state=sending`), `package/dist/preview-gallery.html` and `previews/taskpane-preview.html` at the root (a standalone file showing light and dark, French and English). These files are never referenced by the manifest and never produced by `build` or `build:prod`: do not deploy them. The Smart Alerts dialog is drawn by Outlook and is not customizable.
 
 <!-- icon: key -->
 ## 9. Exceptional send
@@ -736,19 +737,19 @@ Every returned line is an exceptional-send message **without a receipt issued by
 
 ### 11.1 What is distributed
 
-A public user can download only what is needed to **deploy and use** the add-in. Three channels carry the same set of files:
+A public user can download only what is needed to **deploy and use** the add-in. It all lives in the `package/` folder of the repository, and the three channels carry the same files:
 
 ```cards
-download | Release ZIP | `NoFridayMail-<version>.zip` on the Releases page. Recommended. Owner-signed PowerShell files and `PackageIntegrity.psd1`.
-folder | Download ZIP / `git archive` | The same files, built from the repository by `.gitattributes` `export-ignore` rules. No signature manifest.
-code | Repository clone | The same files plus the tests, the CI workflows and the developer tools.
+download | Release ZIP | `NoFridayMail-<version>.zip` on the Releases page. Recommended. Its root is the content of `package/`: owner-signed PowerShell files and `PackageIntegrity.psd1` included.
+folder | Download ZIP / `git archive` | Only the `package/` folder (every other entry of the repository carries an `export-ignore` rule in `.gitattributes`). No signature manifest.
+code | Repository clone | The `package/` folder plus the tests, the CI workflows and the developer tools at the root.
 ```
 
-Shipped: `package.json` and lock file, `webpack.config.js`, `src/`, `api/`, the build tools (`tools/build*.js`, `env-config.js`, `manifest-lib.js`, `check-bundle.js`, `package-api.js`, `prepare-api.js`, `swa-config.js`, `validate-manifest.js`, `blocked-days.js`, `deploy-text.js`), `tools/verify-receipt.js` (the compliance team uses it), the deploy script, the environment generator `tools/New-NoFridayMailEnvironment.ps1` and the `tools/lib/` helpers, `tools/Test-PackageIntegrity.ps1`, `manifest.xml`, `staticwebapp.config.json`, the icons, `deploy/environment.schema.json`, `example.json` and `prod.json`, the documentation (Markdown and HTML), `README.md`, `LICENSE`, `THIRD-PARTY-NOTICES.md`, `SECURITY.md`, `CHANGELOG.md`. Kept in the repository only: `tests/` (with the fixtures), `.github/`, the preview and icon-generation tools, the documentation generator, the package builder, `AGENTS.md`, `PROVENANCE.md`. When `tests/` is absent the deploy script skips `npm test` and says so; the build and the validation still run.
+Shipped, all inside `package/` (the release ZIP has these files at its root): `package.json` and lock file, `webpack.config.js`, `src/`, `api/`, the build tools (`tools/build*.js`, `env-config.js`, `manifest-lib.js`, `check-bundle.js`, `package-api.js`, `prepare-api.js`, `swa-config.js`, `validate-manifest.js`, `blocked-days.js`, `deploy-text.js`), `tools/verify-receipt.js` (the compliance team uses it), the deploy script, the environment generator `tools/New-NoFridayMailEnvironment.ps1` and the `tools/lib/` helpers, `tools/Test-PackageIntegrity.ps1`, `manifest.xml`, `staticwebapp.config.json`, the icons (`assets/`), `deploy/environment.schema.json`, `example.json` and `prod.json`, the documentation (`docs/`, Markdown and HTML), the runtime `README.md`, `LICENSE` and `THIRD-PARTY-NOTICES.md`. Kept at the repository root, outside every download: `tests/` (with the fixtures), `.github/`, `tools/` (the tests runner, the preview and icon-generation tools, the documentation generator, the package builder), the SVG icon sources in `assets/`, the public `README.md`, `CHANGELOG.md`, `SECURITY.md`, `AGENTS.md`, `PROVENANCE.md`. When `tests/` is absent (always the case in a download) the deploy script skips `npm test` and says so; the build and the validation still run.
 
 ### 11.2 Integrity and signature of a release
 
-The release ZIP is built from `git archive` of the reviewed revision (so it is identical to the repository download), plus `PackageIntegrity.psd1`: the SHA-256 of every file and the expected signer. `tools/Test-PackageIntegrity.ps1 -Root <folder>` verifies it: a valid, timestamped Authenticode signature of the owner on the PowerShell files and on the manifest, then the SHA-256 of every file; missing, changed or unknown executable files fail. The deploy script runs this check first when `PackageIntegrity.psd1` is present.
+The release ZIP is built from `git archive` of the `package/` folder of the reviewed revision (so it holds the same files as the repository download, without the `package/` prefix), plus `PackageIntegrity.psd1`: the SHA-256 of every file and the expected signer. `tools/Test-PackageIntegrity.ps1 -Root <folder>` verifies it: a valid, timestamped Authenticode signature of the owner on the PowerShell files and on the manifest, then the SHA-256 of every file; missing, changed or unknown executable files fail. The deploy script runs this check first when `PackageIntegrity.psd1` is present.
 
 ```path
 Verify | check | Verify a release
@@ -761,19 +762,21 @@ A checksum alone does not authenticate a file if the checksum and the file can b
 
 ### 11.3 Reporting
 
-See `SECURITY.md` to report a vulnerability privately. Never publish credentials, tenant data or sensitive exploit details in a public issue.
+See `SECURITY.md` at the root of the repository (https://github.com/Nico77600/NoFridayMail/security) to report a vulnerability privately. Never publish credentials, tenant data or sensitive exploit details in a public issue.
 
 <!-- icon: wrench -->
 ## 12. Development
 
 ```steps
-Install | `npm ci` in the repository.
-Test | `npm test` (about 300 tests, `node --test`), then Pester for the deploy script: `Invoke-Pester tests/Deploy.Tests.ps1`.
-Build | `npm run build`, `npm run validate:env`, and `npm run validate` for the development manifest.
+Install | `npm ci` in `package/` (the product) and `npm ci` at the repository root (the development tools: icons, one dependency).
+Test | `npm test` at the repository root (about 300 tests, `node --test`, the tests use the dependencies installed in `package/`), then Pester for the deploy script: `Invoke-Pester tests/Deploy.Tests.ps1`.
+Build | In `package/`: `npm run build`, `npm run validate:env`, and `npm run validate` for the development manifest.
 Change | A short-lived branch, a pull request to `main`, CI green, merge. Release: a new version, a `v` tag, a draft release, then the attestation.
 ```
 
 ### 12.1 Structure
+
+The product is the `package/` folder (paths below are relative to it, except `tests/`, `tools/` and `assets/`, which are at the repository root and never downloaded).
 
 | Path | Role |
 |---|---|
@@ -787,6 +790,9 @@ Change | A short-lived branch, a pull request to `main`, CI green, merge. Releas
 | `manifest.xml` | Development manifest (`https://localhost:3000`); the production manifest is generated by `tools/build-manifest.js`. |
 | `deploy/` | Schema and shipped environments. |
 | `tools/` | Build, checks, deploy script. |
+| `../tools/` | Developer tools (repository root): tests runner, preview, icons, documentation and image generators, package builder. |
+| `../tests/` | The tests and their fixtures. |
+| `../assets/` | SVG sources of the icons (the PNG icons used by the build are in `assets/`). |
 
 ### 12.2 Conventions
 
@@ -794,12 +800,12 @@ Change | A short-lived branch, a pull request to `main`, CI green, merge. Releas
 - Smart Alerts limits apply in each language: message 500 characters, `cancelLabel` 20 characters.
 - Tests never assert the values of operator-owned environment files: they use `tests/fixtures/environments` through `NFM_ENVIRONMENTS_DIR`. Only `example.json` (template) is read as-is.
 - Never let `OnAppointmentSend` bypass. The receipt key is an application setting, never a file, a log line or console output.
-- Hand-written Fluent 2 CSS with light and dark tokens; `npm run icons` regenerates the PNG icons from `assets/icon*.svg`.
+- Hand-written Fluent 2 CSS with light and dark tokens; `npm run icons` (repository root) regenerates the PNG icons of `package/assets/` from the SVG sources in `assets/icon*.svg`.
 - A public-safety test fails if a tenant id, a subscription id, a real host name or a private account name appears in a tracked file.
 
 ### 12.3 Documentation
 
-The guides are Markdown with a small set of fenced blocks (`cards`, `steps`, `flow`, `path`); `tools/Build-Documentation.js` turns them into self-contained HTML pages (`docs/*.html`), and a test checks that the HTML is up to date. Rebuild after editing a guide: `node tools/Build-Documentation.js`.
+The guides are Markdown with a small set of fenced blocks (`cards`, `steps`, `flow`, `path`); `tools/Build-Documentation.js` (repository root) turns them into self-contained HTML pages (`package/docs/*.html`), and a test checks that the HTML is up to date. Rebuild after editing a guide, from the repository root: `npm run docs` (`npm run docs:check` only checks).
 
 <!-- icon: lifebuoy -->
 ## Annex A — Troubleshooting
@@ -860,4 +866,4 @@ The real file `deploy/environments/example.json` has **no** comments (JSON does 
 <!-- icon: tag -->
 ## Annex C — Versioning
 
-MAJOR.MINOR.PATCH for the package (`package.json`, `CHANGELOG.md`); the manifest version has four numbers (`1.1.0.0`) and is raised at each manifest change. A release uses a new version and a `v` tag on a commit already merged into `main`; a tag is never moved, deleted or reused. `CHANGELOG.md`, `package.json` and the manifest `Version` change together. Every change is listed in `CHANGELOG.md`.
+MAJOR.MINOR.PATCH for the package (`package.json`, `CHANGELOG.md`); the manifest version has four numbers (`1.1.1.0`) and is raised at each manifest change. A release uses a new version and a `v` tag on a commit already merged into `main`; a tag is never moved, deleted or reused. `CHANGELOG.md`, `package.json` and the manifest `Version` change together. Every change is listed in `CHANGELOG.md`.

@@ -9,7 +9,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const root = path.join(__dirname, '..');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product: guides, package README
 const docs = path.join(root, 'docs');
 const generator = require('../tools/Build-Documentation');
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
@@ -110,7 +111,7 @@ test('docs : every custom block is rendered (no raw fence, no leftover Markdown 
 });
 
 test('docs : the Markdown guides link only to existing files and headings (GitHub anchors)', () => {
-  const sources = [...generator.GUIDES.map((n) => path.join(docs, `${n}.md`)), path.join(root, 'README.md')];
+  const sources = [...generator.GUIDES.map((n) => path.join(docs, `${n}.md`)), path.join(repo, 'README.md'), path.join(root, 'README.md')];
   for (const file of sources) {
     const md = read(file);
     const dir = path.dirname(file);
@@ -128,10 +129,12 @@ test('docs : the Markdown guides link only to existing files and headings (GitHu
   }
 });
 
-test('docs : README relative HTML links and images exist', () => {
-  const readme = read(path.join(root, 'README.md'));
-  for (const m of readme.matchAll(/\b(?:src|srcset|href)="([^"#:]+)"/g)) {
-    assert.ok(fs.existsSync(path.join(root, m[1])), `README.md: missing ${m[1]}`);
+test('docs : README relative HTML links and images exist (public README at the root, runtime README in package/)', () => {
+  for (const base of [repo, root]) {
+    const readme = read(path.join(base, 'README.md'));
+    for (const m of readme.matchAll(/\b(?:src|srcset|href)="([^"#:?]+)(?:\?raw=true)?"/g)) {
+      assert.ok(fs.existsSync(path.join(base, m[1])), `${path.relative(repo, base) || '.'}/README.md: missing ${m[1]}`);
+    }
   }
 });
 
@@ -151,9 +154,9 @@ test('docs : every link of the HTML guides resolves to an id of the right page',
 });
 
 test('docs : no reference to a French documentation folder or to operator-only files', () => {
-  const files = [...generator.GUIDES.flatMap((n) => [`docs/${n}.md`, `docs/${n}.html`]), 'README.md', 'AGENTS.md'];
+  const files = [...generator.GUIDES.flatMap((n) => [`package/docs/${n}.md`, `package/docs/${n}.html`]), 'README.md', 'package/README.md', 'AGENTS.md'];
   for (const rel of files) {
-    const text = fs.existsSync(path.join(root, rel)) ? read(path.join(root, rel)) : '';
+    const text = fs.existsSync(path.join(repo, rel)) ? read(path.join(repo, rel)) : '';
     assert.doesNotMatch(text, /docs\/fr\b|docs\\fr\b/, `${rel}: no docs/fr`);
     assert.doesNotMatch(text, /\blab\.json\b/, `${rel}: no operator environment file names`);
   }
