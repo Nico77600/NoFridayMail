@@ -7,7 +7,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const root = path.join(__dirname, '..');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
 const script = path.join(root, 'tools', 'Deploy-NoFridayMail.ps1');
 const text = fs.readFileSync(script, 'utf8');
 
@@ -16,7 +17,7 @@ const hasPwsh = pwsh.status === 0 && Number(pwsh.stdout.trim()) >= 7;
 
 // Fixture environments (tests/fixtures/environments): the tests never read the operator files
 // (deploy/environments.local). Only example.json (template) is read from deploy/environments.
-const FIXTURES = path.join(root, 'tests', 'fixtures', 'environments');
+const FIXTURES = path.join(repo, 'tests', 'fixtures', 'environments');
 const withFixtures = () => Object.assign(envWithoutAz(), { NFM_ENVIRONMENTS_DIR: FIXTURES });
 
 /**

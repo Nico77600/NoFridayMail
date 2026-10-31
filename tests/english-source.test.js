@@ -39,15 +39,15 @@ const lineOf = (text, index) => text.slice(0, index).split('\n').length;
 
 // Files that must hold no French accented letter at all.
 const WHOLE_FILE = (f) =>
-  /^(tools|api\/src|deploy|\.github)\//.test(f) ||
-  /^(package\.json|webpack\.config\.js|staticwebapp\.config\.json|CHANGELOG\.md|api\/package\.json|api\/host\.json)$/.test(f) ||
+  /^(tools|package\/(tools|api\/src|deploy)|\.github)\//.test(f) ||
+  /^(package\.json|CHANGELOG\.md|package\/(package\.json|webpack\.config\.js|staticwebapp\.config\.json|api\/package\.json|api\/host\.json))$/.test(f) ||
   /^assets\/.*\.svg$/.test(f) ||
   /^tests\/.*\.ps1$/.test(f) ||
   /^tests\/fixtures\//.test(f);
 
 // Files where only the comments (and test titles) are checked: they also hold French user-interface text.
-const COMMENTS_ONLY_JS = (f) => /^(src|tests)\/.*\.js$/.test(f) && !f.startsWith('src/taskpane/msal');
-const COMMENTS_ONLY_MARKUP = (f) => /^(src\/.*\.html|manifest\.xml)$/.test(f);
+const COMMENTS_ONLY_JS = (f) => /^(package\/src|tests)\/.*\.js$/.test(f) && !f.startsWith('package/src/taskpane/msal');
+const COMMENTS_ONLY_MARKUP = (f) => /^(package\/src\/.*\.html|package\/manifest\.xml)$/.test(f);
 
 function jsComments(code) {
   const comments = [];
@@ -134,7 +134,7 @@ test('English only: comments of the pages and of the manifest hold no French acc
 });
 
 test('English only: French is confined to the languages.fr block of src/shared/config.js (no French in the English block or in code)', () => {
-  const code = read('src/shared/config.js');
+  const code = read('package/src/shared/config.js');
   const { ast } = jsComments(code);
   const frenchLiterals = [];
   const visit = (node) => {

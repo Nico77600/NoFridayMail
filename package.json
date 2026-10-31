@@ -1,48 +1,22 @@
 {
-  "name": "nofridaymail",
-  "version": "1.1.0",
-  "description": "Outlook add-in (Smart Alerts) that blocks sending emails and invitations on Fridays.",
+  "name": "nofridaymail-development",
+  "version": "1.1.1",
+  "description": "Development tools of NoFridayMail: tests, documentation and image builders. The product is in package/.",
   "private": true,
   "license": "MIT",
   "author": "Nicolas Fabert",
   "engines": {
     "node": ">=22"
   },
-  "config": {
-    "app_to_debug": "outlook",
-    "app_type_to_debug": "desktop",
-    "dev_server_port": 3000
-  },
   "scripts": {
-    "build": "node tools/build.js",
-    "build:prod": "node tools/build.js --strict",
-    "build:dev": "node tools/build.js --dev",
-    "dev-server": "webpack serve --mode development",
-    "start": "office-addin-debugging start manifest.xml",
-    "stop": "office-addin-debugging stop manifest.xml",
-    "validate": "office-addin-manifest validate manifest.xml",
-    "validate:prod": "node tools/validate-manifest.js",
-    "validate:env": "node tools/env-config.js",
+    "test": "node tools/run-tests.js",
     "icons": "node tools/make-icons.js",
+    "images": "node tools/build-preview.js && node tools/New-DocumentationImages.js",
     "docs": "node tools/Build-Documentation.js",
     "docs:check": "node tools/Build-Documentation.js --check",
-    "preview": "node tools/build-preview.js",
-    "test": "node --test \"tests/**/*.test.js\""
+    "preview": "node tools/build-preview.js"
   },
   "devDependencies": {
-    "@azure/msal-browser": "4.30.0",
-    "@resvg/resvg-js": "2.6.2",
-    "adm-zip": "0.6.1",
-    "ajv": "8.20.0",
-    "copy-webpack-plugin": "^14.0.0",
-    "html-webpack-plugin": "^5.6.8",
-    "jose": "5.10.0",
-    "office-addin-debugging": "^7.0.1",
-    "office-addin-dev-certs": "^3.0.1",
-    "office-addin-manifest": "^3.0.1",
-    "terser-webpack-plugin": "^5.6.1",
-    "webpack": "^5.112.0",
-    "webpack-cli": "^7.2.3",
-    "webpack-dev-server": "^6.1.0"
+    "@resvg/resvg-js": "2.6.2"
   }
 }

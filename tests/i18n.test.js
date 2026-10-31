@@ -3,8 +3,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const config = require('../src/shared/config');
-const rules = require('../src/shared/rules');
+const config = require('../package/src/shared/config');
+const rules = require('../package/src/shared/rules');
 
 const at = (month, day, hour = 12, minute = 0) => new Date(2026, month - 1, day, hour, minute, 0, 0);
 const placeholders = (value) => (typeof value === 'string' ? (value.match(/\{\w+\}/g) || []).sort().join(',') : '');

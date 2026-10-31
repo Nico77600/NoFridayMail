@@ -5,9 +5,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const config = require('../src/shared/config');
+const config = require('../package/src/shared/config');
 
-const root = path.join(__dirname, '..');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
 const at = (month, day, hour = 12, minute = 0) => new Date(2026, month - 1, day, hour, minute, 0, 0);
 
 /**
@@ -90,8 +91,8 @@ function installOffice(opts) {
 }
 
 function loadHandlers() {
-  delete require.cache[require.resolve('../src/launchevent/handlers')];
-  return require('../src/launchevent/handlers');
+  delete require.cache[require.resolve('../package/src/launchevent/handlers')];
+  return require('../package/src/launchevent/handlers');
 }
 
 function runMessage(t, now, opts) {
@@ -215,9 +216,9 @@ test('meeting without Mailbox 1.15: no markdown', (t) => {
 
 test('launchevent.js associates both handlers with the manifest FunctionName values', () => {
   const actions = installOffice({});
-  delete require.cache[require.resolve('../src/launchevent/handlers')];
-  delete require.cache[require.resolve('../src/launchevent/launchevent')];
-  require('../src/launchevent/launchevent');
+  delete require.cache[require.resolve('../package/src/launchevent/handlers')];
+  delete require.cache[require.resolve('../package/src/launchevent/launchevent')];
+  require('../package/src/launchevent/launchevent');
   assert.equal(typeof actions.onMessageSendHandler, 'function');
   assert.equal(typeof actions.onAppointmentSendHandler, 'function');
 });
@@ -236,7 +237,7 @@ test('manifest.xml: consistent with the code', () => {
 });
 
 test('texts: respect the Smart Alerts limits (500 characters, 20-character button)', () => {
-  const rules = require('../src/shared/rules');
+  const rules = require('../package/src/shared/rules');
   const s = config.strings;
   assert.ok(s.cancelLabel.length <= 20);
   const vars = {
@@ -254,9 +255,9 @@ test('texts: respect the Smart Alerts limits (500 characters, 20-character butto
 });
 
 function loadLaunchevent() {
-  delete require.cache[require.resolve('../src/launchevent/handlers')];
-  delete require.cache[require.resolve('../src/launchevent/launchevent')];
-  require('../src/launchevent/launchevent');
+  delete require.cache[require.resolve('../package/src/launchevent/handlers')];
+  delete require.cache[require.resolve('../package/src/launchevent/launchevent')];
+  require('../package/src/launchevent/launchevent');
 }
 
 test('launchevent.js calls Office.onReady() before the associate calls (browser runtime)', () => {
@@ -407,7 +408,7 @@ test('meeting: Friday+Saturday blocked, on a Friday -> "lundi"; fallback when ne
   config.blockedDays = [5, 6];
   try {
     assert.match(runAppointment(t, at(10, 30, 10, 0)).errorMessage, /à partir de lundi\./);
-    const rulesModule = require('../src/shared/rules');
+    const rulesModule = require('../package/src/shared/rules');
     const original = rulesModule.nextAllowedSuggestions;
     rulesModule.nextAllowedSuggestions = () => { throw new Error('boom'); };
     try {
@@ -426,7 +427,7 @@ test('meeting: Friday+Saturday blocked, on a Friday -> "lundi"; fallback when ne
 });
 
 test('meeting: fallback with Friday blocked by default -> Monday', (t) => {
-  const rulesModule = require('../src/shared/rules');
+  const rulesModule = require('../package/src/shared/rules');
   const original = rulesModule.nextAllowedSuggestions;
   rulesModule.nextAllowedSuggestions = () => { throw new Error('boom'); };
   try {
@@ -478,7 +479,7 @@ test('all working days blocked: explicit message (message and meeting), no butto
     assert.match(appt.errorMessage, /aucun autre jour ouvré n'est disponible\. La réunion n'a pas été envoyée\.$/);
     assert.match(runAppointment(t, at(10, 28, 10, 0), { lang: 'en-US' }).errorMessage, /no other working day is available/);
     // fallback (catch): same explicit message
-    const rulesModule = require('../src/shared/rules');
+    const rulesModule = require('../package/src/shared/rules');
     const original = rulesModule.nextAllowedSuggestions;
     rulesModule.nextAllowedSuggestions = () => { throw new Error('boom'); };
     try {
@@ -495,7 +496,7 @@ test('all working days blocked: explicit message (message and meeting), no butto
 
 // ---------------------------------------------------------------- justified exceptional send (X-NoFriday-Bypass)
 
-const bypassLib = require('../src/shared/bypass');
+const bypassLib = require('../package/src/shared/bypass');
 
 const HEADER = bypassLib.HEADER_NAME;
 const BYPASS_ON = { enabled: true, minLength: 20, maxLength: 200, minWords: 3, minDistinctChars: 6 };

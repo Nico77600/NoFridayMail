@@ -4,7 +4,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const bypass = require('../src/shared/bypass');
+const bypass = require('../package/src/shared/bypass');
 
 test('constants: header name and version prefix', () => {
   assert.equal(bypass.HEADER_NAME, 'X-NoFriday-Bypass');

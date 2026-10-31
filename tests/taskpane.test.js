@@ -5,7 +5,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const config = require('../src/shared/config');
+const config = require('../package/src/shared/config');
 
 const DAY_MAX = 10;
 const CHIP_MAX = 8;
@@ -195,9 +195,9 @@ function setup(t, nowDate, delayValue, removeMode, opts) {
   }
 
   // Fake MSAL factory (MFA step): never the real MSAL under Node.
-  require('../src/taskpane/naa').setFactory(opts.naa ? opts.naa.factory : null);
-  delete require.cache[require.resolve('../src/taskpane/taskpane')];
-  require('../src/taskpane/taskpane');
+  require('../package/src/taskpane/naa').setFactory(opts.naa ? opts.naa.factory : null);
+  delete require.cache[require.resolve('../package/src/taskpane/taskpane')];
+  require('../package/src/taskpane/taskpane');
 
   const press = (groupId, key, targetId) =>
     els[groupId].fire('keydown', { key, target: targetId ? els[targetId] : els[groupId], preventDefault() {} });
@@ -795,7 +795,7 @@ test('theme: dark/light officeTheme applied, absent or low-contrast -> fallback'
 
 // ---------------------------------------------------------------- justified exceptional send
 
-const bypassLib = require('../src/shared/bypass');
+const bypassLib = require('../package/src/shared/bypass');
 
 const BYPASS_ON = { enabled: true, minLength: 20, maxLength: 200, minWords: 3, minDistinctChars: 6 };
 const GOOD_TEXT = 'Réponse urgente à un client bloqué.';
@@ -1157,7 +1157,7 @@ test('exceptional send: does not affect the existing scheduling flow', (t) => {
 
 // ---------------------------------------------------------------- MFA step: Entra identity + API receipt
 
-const naaModule = require('../src/taskpane/naa');
+const naaModule = require('../package/src/taskpane/naa');
 
 const MFA_BYPASS = {
   enabled: true,

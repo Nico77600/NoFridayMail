@@ -9,11 +9,12 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const root = path.join(__dirname, '..');
-const envConfig = require('../tools/env-config');
-const { packageApi, packageDir, verifyPackage } = require('../tools/package-api');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
+const envConfig = require('../package/tools/env-config');
+const { packageApi, packageDir, verifyPackage } = require('../package/tools/package-api');
 
-const FIXTURES = path.join(root, 'tests', 'fixtures', 'environments');
+const FIXTURES = path.join(repo, 'tests', 'fixtures', 'environments');
 process.env.NFM_ENVIRONMENTS_DIR = FIXTURES;
 const rules = envConfig.resolveRules(envConfig.loadEnvironment('mfa-filled'), {});
 
@@ -75,7 +76,7 @@ test('package: rebuilt from scratch (stale files removed) and one folder per env
   packageApi(rules, 'mfa-filled', target);
   assert.equal(fs.existsSync(path.join(target, 'src', 'stale.js')), false);
   assert.equal(packageDir('mfa-filled'), path.join(root, 'out', 'api-pkg', 'mfa-filled'));
-  assert.equal(fs.readFileSync(path.join(root, '.gitignore'), 'utf8').includes('out/'), true, 'out/ is ignored by git');
+  assert.equal(fs.readFileSync(path.join(repo, '.gitignore'), 'utf8').includes('out/'), true, 'out/ is ignored by git');
 });
 
 test('verification: refuses a package without node_modules; accepts a package where the function loads and registers', (t) => {

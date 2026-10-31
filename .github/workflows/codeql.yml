@@ -48,7 +48,7 @@
               "build-mode": "none",
               "config": {
                 "name": "JavaScript and TypeScript sources",
-                "paths": ["src", "api", "tools"]
+                "paths": ["package/src", "package/api", "package/tools", "tools"]
               }
             }
           ]

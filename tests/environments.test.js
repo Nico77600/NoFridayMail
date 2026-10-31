@@ -5,16 +5,17 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const envConfig = require('../tools/env-config');
-const { renderManifest, normalizeOrigin } = require('../tools/manifest-lib');
-const { checkLaunchEvent } = require('../tools/check-bundle');
+const envConfig = require('../package/tools/env-config');
+const { renderManifest, normalizeOrigin } = require('../package/tools/manifest-lib');
+const { checkLaunchEvent } = require('../package/tools/check-bundle');
 
-const root = path.join(__dirname, '..');
+const repo = path.join(__dirname, '..');
+const root = path.join(repo, 'package'); // the product
 // The tests NEVER read the operator environment files (deploy/environments.local): only example.json (template) is read as is
 // from deploy/environments. Everything else goes through tests/fixtures/environments (including lab-frozen, a protected
 // environment with neutral values) thanks to NFM_ENVIRONMENTS_DIR (tools/env-config.js), active for this whole file;
 // real() temporarily switches it to the git-tracked folder.
-const FIXTURES = path.join(root, 'tests', 'fixtures', 'environments');
+const FIXTURES = path.join(repo, 'tests', 'fixtures', 'environments');
 const REAL = path.join(root, 'deploy', 'environments');
 process.env.NFM_ENVIRONMENTS_DIR = FIXTURES;
 function real(fn) {
@@ -488,7 +489,7 @@ test('azure.appInsights: optional name validated', () => {
 });
 
 test('staticwebapp.config.json: copied as is without MFA, anonymous no-cache /api/* route with MFA', () => {
-  const { staticWebAppConfig, withApi } = require('../tools/swa-config');
+  const { staticWebAppConfig, withApi } = require('../package/tools/swa-config');
   const source = fs.readFileSync(path.join(root, 'staticwebapp.config.json'));
   assert.equal(staticWebAppConfig(source, false), source, 'same content, byte for byte');
   const out = JSON.parse(staticWebAppConfig(source, true));

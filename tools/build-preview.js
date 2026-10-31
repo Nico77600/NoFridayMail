@@ -19,11 +19,13 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const root = path.join(__dirname, '..');
-const dist = path.join(root, 'dist');
+const pkgRoot = path.join(root, 'package'); // the product: webpack.config.js, src, dist
+const dist = path.join(pkgRoot, 'dist');
 // The preview task pane is built with the exceptional send enabled (BYPASS_ENABLED, see tools/env-config.js)
 // to show the section; this build is never deployed (dist/ is not an environment).
-const webpackCli = require.resolve('webpack-cli/bin/cli.js');
+const webpackCli = require.resolve('webpack-cli/bin/cli.js', { paths: [pkgRoot] });
 const built = spawnSync(process.execPath, [webpackCli, '--mode', 'production'], {
+  cwd: pkgRoot,
   stdio: 'inherit',
   env: Object.assign({}, process.env, { NFM_ENV: '', BYPASS_ENABLED: 'true' })
 });

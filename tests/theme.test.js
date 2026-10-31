@@ -5,9 +5,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const theme = require('../src/taskpane/theme');
+const theme = require('../package/src/taskpane/theme');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'taskpane', 'taskpane.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'package', 'src', 'taskpane', 'taskpane.html'), 'utf8');
 
 function palette(selectorStart) {
   const start = html.indexOf(selectorStart);
@@ -142,14 +142,17 @@ test('exceptional send: collapsed, accessible section, secondary button, no fixe
 });
 
 test('preview tools: never referenced by the manifest nor produced by build/build:prod', () => {
-  const root = path.join(__dirname, '..');
+  const root = path.join(__dirname, '..', 'package');
   const manifest = fs.readFileSync(path.join(root, 'manifest.xml'), 'utf8');
   assert.doesNotMatch(manifest, /preview|fake-office/i);
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   for (const name of ['build', 'build:prod', 'build:dev']) {
     assert.doesNotMatch(pkg.scripts[name], /preview/, name);
   }
-  assert.match(pkg.scripts.preview, /build-preview\.js/);
+  // The preview is a development script of the repository root, not of the package.
+  assert.equal(pkg.scripts.preview, undefined);
+  const devPkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  assert.match(devPkg.scripts.preview, /build-preview\.js/);
   const webpackConfig = fs.readFileSync(path.join(root, 'webpack.config.js'), 'utf8');
   assert.doesNotMatch(webpackConfig, /preview|fake-office/i);
 });

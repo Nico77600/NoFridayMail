@@ -4,7 +4,7 @@
   "name": "prod",
   "displayName": "NoFridayMail",
   "addinId": "e0a93350-84f0-44c9-a8d7-4c3bad350724",
-  "version": "1.1.0.0",
+  "version": "1.1.1.0",
   "providerName": "Nicolas Fabert",
   "supportUrl": "https://github.com/Nico77600/NoFridayMail",
   "azure": {
