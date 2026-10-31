@@ -298,15 +298,15 @@ Describe 'Package builder guards' {
     It 'refuses a release without the root CHANGELOG.md' {
         & git -C $script:Case rm -q CHANGELOG.md 2>&1 | Out-Null
         & git -C $script:Case commit -q -m 'remove CHANGELOG.md' 2>&1 | Out-Null
-        $run = Invoke-Child -Arguments @('-File', (Join-Path $script:Case 'toolsNew-NoFridayMailPackage.ps1'), '-Unsigned', '-Destination', (Join-Path $script:CaseOut 'pkg'))
+        $run = Invoke-Child -Arguments @('-File', (Join-Path $script:Case 'tools\New-NoFridayMailPackage.ps1'), '-Unsigned', '-Destination', (Join-Path $script:CaseOut 'pkg'))
         $run.ExitCode | Should -Not -Be 0
         $run.Text | Should -Match 'CHANGELOG.md'
     }
     It 'refuses a CHANGELOG.md inside package (it would hide the root one)' {
-        [IO.File]::WriteAllText((Join-Path $script:Case 'packageCHANGELOG.md'), 'shadow')
+        [IO.File]::WriteAllText((Join-Path $script:Case 'package\CHANGELOG.md'), 'shadow')
         & git -C $script:Case add -A 2>&1 | Out-Null
         & git -C $script:Case -c core.autocrlf=false commit -q -m 'add CHANGELOG.md to the package folder' 2>&1 | Out-Null
-        $run = Invoke-Child -Arguments @('-File', (Join-Path $script:Case 'toolsNew-NoFridayMailPackage.ps1'), '-Unsigned', '-Destination', (Join-Path $script:CaseOut 'pkg'))
+        $run = Invoke-Child -Arguments @('-File', (Join-Path $script:Case 'tools\New-NoFridayMailPackage.ps1'), '-Unsigned', '-Destination', (Join-Path $script:CaseOut 'pkg'))
         $run.ExitCode | Should -Not -Be 0
         $run.Text | Should -Match 'must not exist inside package'
     }
