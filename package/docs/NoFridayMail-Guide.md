@@ -1,9 +1,9 @@
 ---
 title: NoFridayMail
 subtitle: Developer guide
-version: 1.1.1
+version: 1.1.2
 author: Nicolas Fabert
-updated: 2026-10-30
+updated: 2026-11-26
 ---
 
 # NoFridayMail — Developer guide

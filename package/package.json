@@ -1,6 +1,6 @@
 {
   "name": "nofridaymail",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Outlook add-in (Smart Alerts) that blocks sending emails and invitations on Fridays.",
   "private": true,
   "license": "MIT",
@@ -38,5 +38,9 @@
     "webpack": "^5.112.0",
     "webpack-cli": "^7.2.3",
     "webpack-dev-server": "^6.1.0"
+  },
+  "overrides": {
+    "@azure/msal-node": "7.2.3",
+    "glob": "14.0.6"
   }
 }

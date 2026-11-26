@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="package/docs/images/readme-banner-dark.png">
-    <img alt="NoFridayMail: an Outlook add-in (Smart Alerts) that stops mail and meeting invitations from leaving on the days you choose, Friday by default, and offers the next working day instead; an optional justified exceptional send is protected by multi-factor authentication. Version 1.1.1, MIT license" src="package/docs/images/readme-banner-light.png">
+    <img alt="NoFridayMail: an Outlook add-in (Smart Alerts) that stops mail and meeting invitations from leaving on the days you choose, Friday by default, and offers the next working day instead; an optional justified exceptional send is protected by multi-factor authentication. Version 1.1.2, MIT license" src="package/docs/images/readme-banner-light.png">
   </picture>
 </p>
 
