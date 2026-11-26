@@ -1,9 +1,9 @@
 ---
 title: NoFridayMail
 subtitle: User guide
-version: 1.1.1
+version: 1.1.2
 author: Nicolas Fabert
-updated: 2026-10-30
+updated: 2026-11-26
 ---
 
 # NoFridayMail — User guide
@@ -69,7 +69,7 @@ key | Exceptional send (option) | With a written justification, and an identity 
 
 | Download | Where | What it is |
 |---|---|---|
-| **Release ZIP** `NoFridayMail-1.1.1.zip` (**recommended**) | the *Releases* page of the repository | The files to deploy and use, with the owner-signed PowerShell files and the integrity manifest `PackageIntegrity.psd1`. The deploy script verifies them before it runs anything. |
+| **Release ZIP** `NoFridayMail-1.1.2.zip` (**recommended**) | the *Releases* page of the repository | The files to deploy and use, with the owner-signed PowerShell files and the integrity manifest `PackageIntegrity.psd1`. The deploy script verifies them before it runs anything. |
 | *Download ZIP* of the repository, or `git archive` | the green **Code** button | **Exactly the same files**, without the signatures and the manifest, in a `package\` folder: work from that folder. |
 | `git clone` of the repository | GitHub | The `package\` folder (the same files), plus what only contributors need at the root: the tests (`tests\`), the CI workflows (`.github\`), the preview, icon and documentation tools. |
 

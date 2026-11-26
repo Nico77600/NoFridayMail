@@ -3,6 +3,14 @@
 All notable changes are listed here. Versions follow MAJOR.MINOR.PATCH (see the developer guide, Annex C).
 Author: Nicolas Fabert.
 
+## [1.1.2] — 2026-11-26
+
+Maintenance release: development dependencies updated to clear the open security advisories. The add-in, the API and the signed PowerShell files are unchanged.
+
+### Changed
+- Development dependencies updated (`package/package-lock.json`); none of them is part of the deployed add-in or the API.
+- Version 1.1.2 (`package.json`, `api/package.json`, `deploy/environments/prod.json` 1.1.2.0, front matter of the guides, README banner).
+
 ## [1.1.1] — 2026-10-30
 
 README and documentation visuals aligned with the house style of the other repositories. No change to the add-in, to the scripts or to the deployment: the signed PowerShell files are unchanged.
